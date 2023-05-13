@@ -13,15 +13,21 @@ function M.setup()
 	local filename = a.nvim_exec2("echo expand('%')", { output = true }).output
 	vim.cmd("e " .. filename)
 
-	-- get content
+	-- get win, buf
 	local buf = a.nvim_get_current_buf()
-	local lines = a.nvim_buf_get_lines(buf, 0, -1, false)
-	table.remove(lines)
+	local win = a.nvim_get_current_win()
 
-	-- to tree and back
-	local ptree = t.lines_to_ptree(lines)
-  t.render_tree(ptree)
+	-- render and reset focus
+	t.render(win)
 
+	-- hot reload
+	a.nvim_create_autocmd("BufWritePost", {
+		group = a.nvim_create_augroup("hmm_save", { clear = true }),
+		buffer = buf,
+		callback = function()
+			t.render(win)
+		end,
+	})
 end
 
 return M
