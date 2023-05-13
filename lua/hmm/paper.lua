@@ -1,156 +1,208 @@
--- public class Paper {
--- 	public static class Tree {
--- 		   double w, h;          // ^{\normalfont Width and height.}^
--- 		   double x, y, prelim, mod, shift, change;
--- 		   Tree tl, tr;          // ^{\normalfont Left and right thread.}^
--- 		   Tree el, er;          // ^{\normalfont Extreme left and right nodes.}^
--- 		   double msel, mser;    // ^{\normalfont Sum of modifiers at the extreme nodes.}^
--- 		   Tree[] c; int cs;     // ^{\normalfont Array of children and number of children.}^
---
--- 		   Tree(double w, double h, double y,Tree... c) {
--- 		      this.w = w; this.h = h; this.y = y; this.c = c;
--- 		      this.cs = c.length;
--- 		   }
--- 		 }
--- 		static void layout(Tree t){ firstWalk(t); secondWalk(t,0); }
---
--- 		static  void firstWalk(Tree t){
--- 		  if(t.cs == 0){ setExtremes(t); return; }
--- 		  firstWalk(t.c[0]);
--- 		  // ^{\normalfont Create siblings in contour minimal vertical coordinate and index list.}^
--- 		  IYL ih =  updateIYL(bottom(t.c[0].el),0,null);
--- 		  for(int i = 1; i < t.cs; i++){
--- 		     firstWalk(t.c[i]);
--- 		     //^{\normalfont Store lowest vertical coordinate while extreme nodes still point in current subtree.}^
--- 		     double minY = bottom(t.c[i].er);
--- 		     seperate(t,i,ih);
--- 		     ih = updateIYL(minY,i,ih);
--- 		  }
--- 		  positionRoot(t);
--- 		  setExtremes(t);
--- 		}
---
--- 		static  void setExtremes(Tree t) {
--- 		   if(t.cs == 0){
--- 		      t.el = t; t.er = t;
--- 		      t.msel = t.mser =0;
--- 		   } else {
--- 		      t.el = t.c[0].el; t.msel = t.c[0].msel;
--- 		      t.er = t.c[t.cs-1].er; t.mser = t.c[t.cs-1].mser;
--- 		   }
--- 		}
---
--- 		static void seperate(Tree t,int i,  IYL ih ){
--- 		   // ^{\normalfont Right contour node of left siblings and its sum of modfiers.}^
--- 		   Tree sr = t.c[i-1]; double mssr = sr.mod;
--- 		   // ^{\normalfont Left contour node of current subtree and its sum of modfiers.}^
--- 		   Tree cl = t.c[i]  ; double mscl = cl.mod;
--- 		   while(sr != null && cl != null){
--- 		      if(bottom(sr) > ih.lowY) ih = ih.nxt;
--- 		      // ^{\normalfont How far to the left of the right side of sr is the left side of cl?}^
--- 		      double dist = (mssr + sr.prelim + sr.w) - (mscl + cl.prelim);
--- 		      if(dist > 0){
--- 		         mscl+=dist;
--- 		         moveSubtree(t,i,ih.index,dist);
--- 		      }
--- 		      double sy = bottom(sr), cy = bottom(cl);
--- 		      // ^{\normalfont Advance highest node(s) and sum(s) of modifiers}^
--- 		      if(sy <= cy){
--- 		         sr = nextRightContour(sr);
--- 		         if(sr!=null) mssr+=sr.mod;
--- 		      }
--- 		      if(sy >= cy){
--- 		         cl = nextLeftContour(cl);
--- 		         if(cl!=null) mscl+=cl.mod;
--- 		      }
--- 		   }
--- 		   // ^{\normalfont Set threads and update extreme nodes.}^
--- 		   // ^{\normalfont In the first case, the current subtree must be taller than the left siblings.}^
--- 		   if(sr == null && cl != null) setLeftThread(t,i,cl, mscl);
--- 		   // ^{\normalfont In this case, the left siblings must be taller than the current subtree.}^
--- 		   else if(sr != null && cl == null) setRightThread(t,i,sr,mssr);
--- 		}
---
--- 		static void moveSubtree(Tree t, int i, int si, double dist) {
--- 		   // ^{\normalfont Move subtree by changing mod.}^
--- 		   t.c[i].mod+=dist; t.c[i].msel+=dist; t.c[i].mser+=dist;
--- 		   distributeExtra(t, i, si, dist);
--- 		}
---
--- 		static Tree nextLeftContour(Tree t) {return t.cs==0 ? t.tl : t.c[0];}
--- 		static Tree nextRightContour(Tree t){return t.cs==0 ? t.tr : t.c[t.cs-1];}
--- 		static double bottom(Tree t) { return t.y + t.h;  }
---
--- 		static void setLeftThread(Tree t, int i, Tree cl, double modsumcl) {
--- 		   Tree li = t.c[0].el;
--- 		   li.tl = cl;
--- 		   // ^{\normalfont Change mod so that the sum of modifier after following thread is correct.}^
--- 		   double diff = (modsumcl - cl.mod) - t.c[0].msel ;
--- 		   li.mod += diff;
--- 		   // ^{\normalfont Change preliminary x coordinate so that the node does not move.}^
--- 		   li.prelim-=diff;
--- 		   // ^{\normalfont Update extreme node and its sum of modifiers.}^
--- 		   t.c[0].el = t.c[i].el; t.c[0].msel = t.c[i].msel;
--- 		}
---
--- 		// ^{\normalfont Symmetrical to setLeftThread.}^
--- 		static void setRightThread(Tree t, int i, Tree sr, double modsumsr) {
--- 		   Tree ri = t.c[i].er;
--- 		   ri.tr = sr;
--- 		   double diff = (modsumsr - sr.mod) - t.c[i].mser ;
--- 		   ri.mod += diff;
--- 		   ri.prelim-=diff;
--- 		   t.c[i].er = t.c[i-1].er; t.c[i].mser = t.c[i-1].mser;
--- 		}
---
--- 		static void positionRoot(Tree t) {
--- 		   // ^{\normalfont Position root between children, taking into account their mod.}^
--- 		   t.prelim = (t.c[0].prelim + t.c[0].mod + t.c[t.cs-1].mod +
--- 		               t.c[t.cs-1].prelim +  t.c[t.cs-1].w)/2 - t.w/2;
--- 		}
---
--- 		static void secondWalk(Tree t, double modsum) {
--- 		   modsum+=t.mod;
--- 		   // ^{\normalfont Set absolute (non-relative) horizontal coordinate.}^
--- 		   t.x = t.prelim + modsum;
--- 		   addChildSpacing(t);
--- 		   for(int i = 0 ; i < t.cs ; i++) secondWalk(t.c[i],modsum);
--- 		}
---
--- 		static void distributeExtra(Tree t, int i, int si, double dist) {
--- 		   // ^{\normalfont Are there intermediate children?}^
--- 		   if(si != i-1){
--- 		      double nr = i - si;
--- 		      t.c[si +1].shift+=dist/nr;
--- 		      t.c[i].shift-=dist/nr;
--- 		      t.c[i].change-=dist - dist/nr;
--- 		   }
--- 		}
---
--- 		// ^{\normalfont Process change and shift to add intermediate spacing to mod.}^
--- 		static void addChildSpacing(Tree t){
--- 		   double d = 0, modsumdelta = 0;
--- 		   for(int i = 0 ; i < t.cs ; i++){
--- 		      d+=t.c[i].shift;
--- 		      modsumdelta+=d + t.c[i].change;
--- 		      t.c[i].mod+=modsumdelta;
--- 		   }
--- 		}
---
--- 		 // ^{\normalfont A linked list of the indexes of left siblings and their lowest vertical coordinate.}^
--- 		static class IYL{
--- 		   double lowY; int index; IYL nxt;
--- 		   public IYL(double lowY, int index, IYL nxt) {
--- 		        this.lowY = lowY; this.index = index; this.nxt = nxt;
--- 		   }
--- 		 }
---
--- 		static IYL updateIYL(double minY, int i, IYL ih) {
--- 		   // ^{\normalfont Remove siblings that are hidden by the new subtree.}^
--- 		   while(ih != null && minY >= ih.lowY) ih = ih.nxt;
--- 		   // ^{\normalfont Prepend the new subtree.}^
--- 		   return new IYL(minY,i,ih);
--- 		}
--- }
---
+local M = {}
 
+function M.new_Tree(w, h, y, c)
+	return {
+    -- predefined properties
+		w = w, -- width
+		h = h, -- height
+		y = y, -- initial height
+		c = c, -- children
+		cs = vim.tbl_count(c), -- count of children
+    -- attributes and explanations
+    x = 0,
+    prelim = 0,
+    mod = 0,
+    shift = 0,
+    change = 0,
+    tl = nil, -- left thread
+    tr = nil, -- right thread
+    el = nil, -- left extreme node
+    er = nil, -- right extreme node
+    msel = 0, -- sum of left modifiers
+    mser = 0, -- sum of right modifiers
+	}
+end
+
+function M.layout(t)
+	M.first_walk(t)
+	M.second_walk(t, 0)
+end
+
+function M.first_walk(t)
+	if t.cs == 0 then
+		M.set_extremes(t)
+		return
+	end
+
+	M.first_walk(t.c[0])
+	-- Create siblings in contour minimal vertical coordinate and index list.
+	local ih = M.update_IYL(M.bottom(t.c[0].el), 0, nil)
+	for i = 1, t.cs, 1 do
+		M.first_walk(t.c[i])
+		-- Store lowest vertical coordinate while extreme nodes still point in current subtree
+		local minY = M.bottom(t.c[i].er)
+		M.seperate(t, i, ih)
+		ih = M.update_IYL(minY, i, ih)
+	end
+
+	M.position_root(t)
+	M.set_extremes(t)
+end
+
+function M.separate(t, i, ih)
+	-- Right contour node of left siblings and its sum of modfiers.
+	local sr = t.c[i - 1]
+	local mssr = sr.mod
+
+	-- Left contour node of current subtree and its sum of modfiers.
+	local cl = t.c[i]
+	local mscl = cl.mod
+	while sr ~= nil and cl ~= nil do
+		if M.bottom(sr) > ih.lowY then
+			ih = ih.nxt
+		end
+
+		-- How far to the left of the right side of sr is the left side of cl?
+		local dist = (mssr + sr.prelim + sr.w) - (mscl + cl.prelim)
+		if dist > 0 then
+			mscl = mscl + dist
+			M.move_subtree(t, i, ih.index, dist)
+		end
+
+		-- Advance highest node(s) and sum(s) of modifiers
+		local sy = M.bottom(sr)
+		local cy = M.bottom(cl)
+		if sy <= cy then
+			sr = M.next_right_contour(sr)
+			if sr ~= nil then
+				mssr = mssr + sr.mod
+			end
+		end
+		if sy >= cy then
+			cl = M.next_left_contour(cl)
+			if cl ~= nil then
+				mscl = mscl + cl.mod
+			end
+		end
+	end
+end
+
+function M.set_extremes(t)
+	if t.cs == 0 then
+		t.el = t
+		t.er = t
+		t.msel = 0
+		t.mser = 0
+	else
+		t.el = t.c[0].el
+		t.msel = t.c[0].msel
+		t.er = t.c[t.cs - 1].er
+		t.mser = t.c[t.cs - 1].mser
+	end
+end
+
+function M.move_subtree(t, i, si, dist)
+	t.c[i].mod = t.c[i].mod + dist
+	t.c[i].msel = t.c[i].msel + dist
+	t.c[i].mser = t.c[i].mser + dist
+	M.distribute_extra(t, i, si, dist)
+end
+
+function M.next_left_contour(t)
+	if t.cs == 0 then
+		return t.tl
+	else
+		return t.c[0]
+	end
+end
+
+function M.next_right_contour(t)
+	if t.cs == 0 then
+		return t.tr
+	else
+		return t.c[t.cs - 1]
+	end
+end
+
+function M.bottom(t)
+	return t.y + t.h
+end
+
+function M.set_left_thread(t, i, cl, modsumcl)
+	local li = t.c[0].el
+	li.tl = cl
+	-- Change mod so that the sum of modifier after following thread is correct
+	local diff = (modsumcl - cl.mod) - t.c[0].msel
+	li.mod = li.mod + diff
+	-- Change preliminary x coordinate so that the node does not move
+	li.prelim = li.prelim - diff
+	-- Update extreme node and its sum of modifiers
+	t.c[0].el = t.c[i].el
+	t.c[0].msel = t.c[i].msel
+end
+
+function M.set_right_thread(t, i, sr, modsumsr)
+	local ri = t.c[i].er
+	ri.tr = sr
+	local diff = (modsumsr - sr.mod) - t.c[i].mser
+	ri.mod = ri.mod + diff
+	ri.prelim = ri.prelim + diff
+	t.c[i].er = t.c[i - 1].er
+	t.c[i].mser = t.c[i - 1].mser
+end
+
+function M.position_root(t)
+	-- Position root between children, taking into account their mod
+	local prelim = t.c[0].prelim + t.c[t.cs - 1].prelim
+	local mod = t.c[0].mod + t.c[t.cs - 1].mod
+	t.prelim = (prelim + mod + t.c[t.cs - 1].w) / 2 - t.w / 2
+end
+
+function M.second_walk(t, modsum)
+	-- Set absolute (non-relative) horizontal coordinate
+	modsum = modsum + t.mod
+	t.x = t.prelim + modsum
+	M.add_child_spacing(t)
+	for i = 1, t.cs, 1 do
+		M.secondWalk(t.c[i], modsum)
+	end
+end
+
+function M.distribute_extra(t, i, si, dist)
+	-- Are there intermediate children?
+	if si ~= i - 1 then
+		local nr = i - si
+		t.c[si + 1].shift = t.c[si + 1].shift + dist / nr
+		t.c[i].shift = t.c[i].shift - dist / nr
+		t.c[i].change = t.c[i].change - dist - dist / nr
+	end
+end
+
+function M.add_child_spacing(t)
+	-- Process change and shift to add intermediate spacing to mod
+	local d = 0
+	local modsumdelta = 0
+	for i = 1, t.cs, 1 do
+		d = d + t.c[i].shift
+		modsumdelta = modsumdelta + d + t.c[i].change
+		t.c[i].mod = t.c[i].mod + modsumdelta
+	end
+end
+
+function M.new_IYL(lowY, index, nxt)
+	-- A linked list of the indexes of left siblings and their lowest vertical coordinate
+	return { lowY = lowY, index = index, nxt = nxt }
+end
+
+function M.update_IYL(minY, i, ih)
+	-- Remove siblings that are hidden by the new subtree
+	while ih ~= nil do
+		if minY >= ih.lowY then
+			ih = ih.nxt
+		end
+	end
+	-- Prepend the new subtree
+	return M.new_IYL(minY, i, ih)
+end
+
+return M
