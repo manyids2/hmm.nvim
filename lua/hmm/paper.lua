@@ -2,24 +2,24 @@ local M = {}
 
 function M.new_Tree(w, h, y, c)
 	return {
-    -- predefined properties
+		-- predefined properties
 		w = w, -- width
 		h = h, -- height
 		y = y, -- initial height
 		c = c, -- children
 		cs = vim.tbl_count(c), -- count of children
-    -- attributes and explanations
-    x = 0,
-    prelim = 0,
-    mod = 0,
-    shift = 0,
-    change = 0,
-    tl = nil, -- left thread
-    tr = nil, -- right thread
-    el = nil, -- left extreme node
-    er = nil, -- right extreme node
-    msel = 0, -- sum of left modifiers
-    mser = 0, -- sum of right modifiers
+		-- attributes and explanations
+		x = 0,
+		prelim = 0,
+		mod = 0,
+		shift = 0,
+		change = 0,
+		tl = nil, -- left thread
+		tr = nil, -- right thread
+		el = nil, -- left extreme node
+		er = nil, -- right extreme node
+		msel = 0, -- sum of left modifiers
+		mser = 0, -- sum of right modifiers
 	}
 end
 
@@ -34,14 +34,18 @@ function M.first_walk(t)
 		return
 	end
 
-	M.first_walk(t.c[0])
+	-- walk the first child
+	M.first_walk(t.c[1])
+
 	-- Create siblings in contour minimal vertical coordinate and index list.
-	local ih = M.update_IYL(M.bottom(t.c[0].el), 0, nil)
-	for i = 1, t.cs, 1 do
+	local ih = M.update_IYL(M.bottom(t.c[1].el), 1, nil)
+
+	-- walk siblings
+	for i = 2, t.cs, 1 do
 		M.first_walk(t.c[i])
 		-- Store lowest vertical coordinate while extreme nodes still point in current subtree
 		local minY = M.bottom(t.c[i].er)
-		M.seperate(t, i, ih)
+		M.separate(t, i, ih)
 		ih = M.update_IYL(minY, i, ih)
 	end
 
@@ -51,11 +55,11 @@ end
 
 function M.separate(t, i, ih)
 	-- Right contour node of left siblings and its sum of modfiers.
-	local sr = t.c[i - 1]
+	local sr = t.c[i]
 	local mssr = sr.mod
 
 	-- Left contour node of current subtree and its sum of modfiers.
-	local cl = t.c[i]
+	local cl = t.c[i + 1]
 	local mscl = cl.mod
 	while sr ~= nil and cl ~= nil do
 		if M.bottom(sr) > ih.lowY then
@@ -66,7 +70,7 @@ function M.separate(t, i, ih)
 		local dist = (mssr + sr.prelim + sr.w) - (mscl + cl.prelim)
 		if dist > 0 then
 			mscl = mscl + dist
-			M.move_subtree(t, i, ih.index, dist)
+			M.move_subtree(t, i + 1, ih.index, dist)
 		end
 
 		-- Advance highest node(s) and sum(s) of modifiers
@@ -94,10 +98,12 @@ function M.set_extremes(t)
 		t.msel = 0
 		t.mser = 0
 	else
-		t.el = t.c[0].el
-		t.msel = t.c[0].msel
-		t.er = t.c[t.cs - 1].er
-		t.mser = t.c[t.cs - 1].mser
+		-- first child
+		t.el = t.c[1].el
+		t.msel = t.c[1].msel
+		-- last child
+		t.er = t.c[t.cs].er
+		t.mser = t.c[t.cs].mser
 	end
 end
 
@@ -153,9 +159,9 @@ end
 
 function M.position_root(t)
 	-- Position root between children, taking into account their mod
-	local prelim = t.c[0].prelim + t.c[t.cs - 1].prelim
-	local mod = t.c[0].mod + t.c[t.cs - 1].mod
-	t.prelim = (prelim + mod + t.c[t.cs - 1].w) / 2 - t.w / 2
+	local prelim = t.c[1].prelim + t.c[t.cs].prelim
+	local mod = t.c[1].mod + t.c[t.cs].mod
+	t.prelim = (prelim + mod + t.c[t.cs].w) / 2 - t.w / 2
 end
 
 function M.second_walk(t, modsum)
@@ -163,7 +169,7 @@ function M.second_walk(t, modsum)
 	modsum = modsum + t.mod
 	t.x = t.prelim + modsum
 	M.add_child_spacing(t)
-	for i = 1, t.cs, 1 do
+	for i = 2, t.cs, 1 do
 		M.secondWalk(t.c[i], modsum)
 	end
 end
