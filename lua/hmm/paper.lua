@@ -1,7 +1,9 @@
 local M = {}
 
-function M.new_Tree(w, h, y, c)
+function M.new_Tree(w, h, y, c, text)
 	return {
+		-- our custom metada
+		text = text,
 		-- predefined properties
 		w = w, -- width
 		h = h, -- height
@@ -29,6 +31,7 @@ function M.layout(t)
 end
 
 function M.first_walk(t)
+	t.cs = vim.tbl_count(t.c)
 	if t.cs == 0 then
 		M.set_extremes(t)
 		return
@@ -43,9 +46,10 @@ function M.first_walk(t)
 	-- walk siblings
 	for i = 2, t.cs, 1 do
 		M.first_walk(t.c[i])
+
 		-- Store lowest vertical coordinate while extreme nodes still point in current subtree
 		local minY = M.bottom(t.c[i].er)
-		M.separate(t, i, ih)
+		-- M.separate(t, i, ih)
 		ih = M.update_IYL(minY, i, ih)
 	end
 
@@ -55,11 +59,11 @@ end
 
 function M.separate(t, i, ih)
 	-- Right contour node of left siblings and its sum of modfiers.
-	local sr = t.c[i]
+	local sr = t.c[i - 1]
 	local mssr = sr.mod
 
 	-- Left contour node of current subtree and its sum of modfiers.
-	local cl = t.c[i + 1]
+	local cl = t.c[i]
 	local mscl = cl.mod
 	while sr ~= nil and cl ~= nil do
 		if M.bottom(sr) > ih.lowY then
@@ -70,7 +74,7 @@ function M.separate(t, i, ih)
 		local dist = (mssr + sr.prelim + sr.w) - (mscl + cl.prelim)
 		if dist > 0 then
 			mscl = mscl + dist
-			M.move_subtree(t, i + 1, ih.index, dist)
+			M.move_subtree(t, i, ih.index, dist)
 		end
 
 		-- Advance highest node(s) and sum(s) of modifiers
@@ -88,6 +92,15 @@ function M.separate(t, i, ih)
 				mscl = mscl + cl.mod
 			end
 		end
+	end
+
+	-- Set threads and update extreme nodes.
+	-- In the first case, the current subtree must be taller than the left siblings.
+	if sr == nil and cl ~= nil then
+		M.set_left_thread(t, i, cl, mscl)
+	-- In this case, the left siblings must be taller than the current subtree.
+	elseif sr ~= nil and cl == nil then
+		M.set_right_thread(t, i, sr, mssr)
 	end
 end
 
@@ -170,7 +183,7 @@ function M.second_walk(t, modsum)
 	t.x = t.prelim + modsum
 	M.add_child_spacing(t)
 	for i = 2, t.cs, 1 do
-		M.secondWalk(t.c[i], modsum)
+		M.second_walk(t.c[i], modsum)
 	end
 end
 
@@ -201,12 +214,19 @@ function M.new_IYL(lowY, index, nxt)
 end
 
 function M.update_IYL(minY, i, ih)
-	-- Remove siblings that are hidden by the new subtree
-	while ih ~= nil do
-		if minY >= ih.lowY then
-			ih = ih.nxt
-		end
+  -- do not run unbounded while loop
+	local count = 0
+
+  -- Remove siblings that are hidden by the new subtree
+	while ih ~= nil and minY >= ih.lowY and count <= 1000 do
+		count = count + 1
+		ih = ih.nxt
 	end
+
+	if count == 1000 then
+		P("exceeded max retries")
+	end
+
 	-- Prepend the new subtree
 	return M.new_IYL(minY, i, ih)
 end

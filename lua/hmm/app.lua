@@ -19,9 +19,9 @@ function M.setup()
 	table.remove(lines)
 
 	-- to tree and back
-	local tree = t.lines_to_tree(lines)
-	local tlines = t.tree_to_lines(tree)
-	P(tlines)
+	local ptree = t.lines_to_ptree(lines)
+  t.render_tree(ptree)
+
 end
 
 return M
