@@ -11,7 +11,7 @@ function M.wrap_text(text, max_leaf_node_width)
 	P(a.nvim_buf_get_lines(buf, 0, -1, false))
 end
 
-function M.new_Tree(index, tabs, text)
+function M.new_Tree(index, tabs, text, parent)
 	return {
 		-- our custom metada
 		index = index,
@@ -19,13 +19,16 @@ function M.new_Tree(index, tabs, text)
 		text = text,
 		open = false,
 		active = false,
+		-- win, buf
 		win = nil,
 		buf = nil,
+		-- hidden flag
+		hidden = false,
 		-- predefined properties
 		c = {}, -- children
 		cs = 0, -- count of children
-		x = 0,
-		y = 0, -- initial height
+		x = 5,
+		y = 5, -- initial height
 		w = a.nvim_strwidth(text) + 2, -- width
 		h = 1, -- height
 		tw = a.nvim_strwidth(text) + 2, -- width of tree
@@ -34,12 +37,12 @@ function M.new_Tree(index, tabs, text)
 end
 
 function M.lines_to_htree(lines, offset, size)
-	local root = { M.new_Tree(0, 0, "root") }
+	local root = { M.new_Tree(0, 0, "root", nil) }
 	local nodes = {}
 	for index, line in ipairs(lines) do
 		local tabs = vim.tbl_count(vim.split(line, "\t", {}))
 		line = vim.trim(line)
-		local node = M.new_Tree(index, tabs, line)
+		local node = M.new_Tree(index, tabs, line, root[tabs])
 		table.insert(nodes, node)
 		if root[tabs] ~= nil then
 			table.insert(root[tabs].c, node)
@@ -58,7 +61,6 @@ function M.lines_to_htree(lines, offset, size)
 	-- -- run the algo
 	M.set_cs(ptree)
 	M.set_hw(ptree)
-	-- p.second_walk(ptree, 1)
 
 	return ptree
 end
@@ -85,26 +87,66 @@ function M.set_hw(tree)
 	tree.tw = size.w
 end
 
+function M.open_children(tree)
+	tree.open = true
+	for _, child in ipairs(tree.c) do
+		child.open = true
+	end
+end
+
+function M.close_tree(tree)
+	tree.open = false
+	for _, child in ipairs(tree.c) do
+		M.close_tree(child)
+	end
+end
+
+function M.toggle_node(tree)
+	tree.open = not tree.open
+	if vim.tbl_count(tree.c) == 0 then
+		return
+	end
+
+	if tree.open then
+		M.open_children(tree)
+	else
+		M.close_tree(tree)
+	end
+
+	M.render_tree(tree)
+end
+
 function M.render_tree(tree)
+	if tree.buf == nil then
+		tree.buf = a.nvim_create_buf(false, true)
+		a.nvim_buf_set_lines(tree.buf, 0, 1, false, { " " .. tree.text .. " " })
+	end
+
+	if tree.win == nil then
+		tree.win = a.nvim_open_win(tree.buf, true, {
+			relative = "editor",
+			row = math.ceil(tree.y),
+			col = 2 + math.ceil(tree.x),
+			width = tree.w,
+			height = tree.h,
+			zindex = 20,
+			style = "minimal",
+		})
+	else
+		a.nvim_win_set_config(tree.win, {
+			relative = "editor",
+			row = math.ceil(tree.y),
+			col = 2 + math.ceil(tree.x),
+			width = tree.w,
+			height = tree.h,
+		})
+	end
+
+	M.keymaps(tree)
+
 	if not tree.open then
 		return
 	end
-	-- create buffer
-	tree.buf = a.nvim_create_buf(false, true)
-	a.nvim_buf_set_lines(tree.buf, 0, 1, false, { " " .. tree.text .. " " })
-
-	-- launch and keep track of win
-	tree.win = a.nvim_open_win(tree.buf, true, {
-		relative = "editor",
-		row = math.ceil(tree.y),
-		col = 2 + math.ceil(tree.x),
-		width = tree.w,
-		height = tree.h,
-		zindex = 20,
-		style = "minimal",
-	})
-
-	M.keymaps(tree)
 
 	if vim.tbl_count(tree.c) > 0 then
 		for _, child in ipairs(tree.c) do
@@ -117,6 +159,7 @@ function M.keymaps(tree)
 	-- expand node
 	vim.keymap.set("n", "<space>", function()
 		vim.notify("toggle node")
+		M.toggle_node(tree)
 	end, { desc = "Open/Close", buffer = tree.buf })
 end
 
@@ -150,6 +193,7 @@ function M.render(app)
 
 	-- render it
 	M.render_tree(app.tree)
+  P(a.nvim_list_wins())
 end
 
 return M
