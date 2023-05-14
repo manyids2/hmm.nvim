@@ -7,7 +7,7 @@ function P(x)
 	print(vim.inspect(x))
 end
 
-require("hmm.app").setup()
+require("hmm").setup()
 
 -- vim.cmd([[
 -- hi Cursor guifg=red guibg=red

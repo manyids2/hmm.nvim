@@ -2,8 +2,6 @@ local a = vim.api
 local p = require("hmm.paper")
 local M = {}
 
-M.winbufs = {}
-
 function M.tree_to_lines(tree, level)
 	if level == nil then
 		level = 0
@@ -58,7 +56,7 @@ function M.lines_to_ptree(lines)
 	return ptree
 end
 
-function M.render_tree(tree)
+function M.render_tree(tree, winbufs)
 	-- create buffer
 	local buf = a.nvim_create_buf(false, true)
 	a.nvim_buf_set_lines(buf, 0, 1, false, { tree.text })
@@ -73,37 +71,40 @@ function M.render_tree(tree)
 		zindex = 20,
 		style = "minimal",
 	})
-	table.insert(M.winbufs, { win, buf })
+	table.insert(winbufs, { win, buf })
 
 	if vim.tbl_count(tree.c) > 0 then
 		for _, child in ipairs(tree.c) do
-			M.render_tree(child)
+			M.render_tree(child, winbufs)
 		end
 	end
 end
 
-function M.destroy(self)
-	for _, winbuf in ipairs(self.winbufs) do
+function M.destroy(winbufs)
+	for _, winbuf in ipairs(winbufs) do
 		a.nvim_win_close(winbuf[1], false)
 		a.nvim_buf_delete(winbuf[2], { force = false })
 	end
-	M.winbufs = {}
 end
 
-function M.render(win)
+function M.render(win, app)
 	-- Scrub
-	M:destroy()
+	M.destroy(app.winbufs)
+	app.winbufs = {}
 
 	-- Get the content
 	local buf = a.nvim_get_current_buf()
 	local lines = a.nvim_buf_get_lines(buf, 0, -1, false)
-	table.remove(lines)
+	local nlines = vim.tbl_count(lines)
+	if string.len(lines[nlines]) == 0 then
+		table.remove(lines)
+	end
 
 	-- create the tree
 	local tree = M.lines_to_ptree(lines)
 
 	-- render it
-	M.render_tree(tree)
+	M.render_tree(tree, app.winbufs)
 
 	-- reset focus
 	a.nvim_set_current_win(win)
