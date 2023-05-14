@@ -27,7 +27,7 @@ function M.new_Tree(index, tabs, text, parent)
 		-- predefined properties
 		p = parent, -- parent
 		c = {}, -- children
-		cs = 0, -- count of children
+		ci = 0, -- ith child
 		x = tabs * 10,
 		y = 5, -- initial height
 		w = a.nvim_strwidth(text) + 2, -- width
@@ -60,16 +60,16 @@ function M.lines_to_htree(lines, offset, size)
 	ptree.y = offset.y + math.ceil(size.h / 2)
 
 	-- -- run the algo
-	M.set_cs(ptree)
+	M.set_ci(ptree)
 	M.set_hw(ptree)
 
 	return ptree
 end
 
-function M.set_cs(tree)
-	tree.cs = vim.tbl_count(tree.c)
-	for _, child in ipairs(tree.c) do
-		M.set_cs(child)
+function M.set_ci(tree)
+	for index, child in ipairs(tree.c) do
+		child.ci = index
+		M.set_ci(child)
 	end
 end
 
@@ -186,6 +186,26 @@ function M.keymaps(tree)
 			a.nvim_set_current_win(tree.p.win)
 		end
 	end, { desc = "Parent", buffer = tree.buf })
+
+	-- up
+	vim.keymap.set("n", "k", function()
+		if tree.p == nil then
+			return
+		end
+		if tree.ci > 1 then
+			a.nvim_set_current_win(tree.p.c[tree.ci - 1].win)
+		end
+	end, { desc = "Prev sibling", buffer = tree.buf })
+
+	-- down
+	vim.keymap.set("n", "j", function()
+		if tree.p == nil then
+			return
+		end
+		if tree.ci < vim.tbl_count(tree.p.c) then
+			a.nvim_set_current_win(tree.p.c[tree.ci + 1].win)
+		end
+	end, { desc = "Next sibling", buffer = tree.buf })
 end
 
 function M.destroy_tree(tree)
@@ -218,7 +238,6 @@ function M.render(app)
 
 	-- render it
 	M.render_tree(app.tree)
-	P(a.nvim_list_wins())
 end
 
 return M
