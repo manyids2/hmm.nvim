@@ -54,9 +54,6 @@ function M.setup(config)
 
 	-- create tree, render
 	t.render(M, lines)
-
-	-- open root
-	t.open_children(M.tree)
 end
 
 function M.global_keymaps()

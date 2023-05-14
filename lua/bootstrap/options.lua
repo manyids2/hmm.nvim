@@ -12,7 +12,6 @@ opt.grepformat = "%f:%l:%c:%m"
 opt.grepprg = "rg --vimgrep"
 opt.ignorecase = true -- Ignore case
 opt.inccommand = "nosplit" -- preview incremental substitute
-opt.laststatus = 0
 opt.list = false -- Show some invisible characters (tabs...
 opt.mouse = "a" -- Enable mouse mode
 opt.number = false -- Print line number
@@ -42,8 +41,8 @@ opt.wildmode = "longest:full,full" -- Command-line completion mode
 opt.winminwidth = 5 -- Minimum window width
 opt.wrap = false -- Disable line wrap
 opt.foldlevel = 99 -- Disable line wrap
-opt.cmdheight = 2 -- Disable command line at bottom
-opt.laststatus = 3
+opt.cmdheight = 0 -- Disable command line at bottom
+opt.laststatus = 0
 
 if vim.fn.has("nvim-0.9.0") == 1 then
 	opt.splitkeep = "screen"
