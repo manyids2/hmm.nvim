@@ -1,5 +1,6 @@
 local a = vim.api
 local t = require("hmm.htree")
+local k = require("hmm.keymaps")
 
 local M = {}
 
@@ -38,9 +39,6 @@ function M.setup(config)
 	-- Get the content
 	local lines = a.nvim_buf_get_lines(a.nvim_get_current_buf(), 0, -1, false)
 
-	-- set global keymaps
-	M.global_keymaps()
-
 	-- get win, buf
 	M.buf = a.nvim_create_buf(false, true)
 	M.win = a.nvim_get_current_win()
@@ -50,22 +48,13 @@ function M.setup(config)
 
 	-- create tree
 	M.tree = t.lines_to_htree(lines, M)
+	M.active = M.tree
+
+	-- set global keymaps
+	k.global_keymaps(M)
 
 	-- render
 	t.render(M)
-end
-
-function M.global_keymaps()
-	local map = vim.keymap.set
-	-- focus root
-	map("n", "m", function()
-		a.nvim_set_current_win(M.tree.win)
-	end, { desc = "Focus root" })
-
-	-- save to source
-	map("n", "s", function()
-		vim.notify("Saved " .. M.filename)
-	end, { desc = "Save" })
 end
 
 return M
