@@ -20,10 +20,8 @@ function M.new_Tree(index, level, text)
 		text = text,
 		open = false,
 		active = false,
-		-- win, buf
-		win = nil,
-		buf = nil,
-		root = nil,
+		-- ref to app
+		app = nil,
 		-- base props
 		p = nil, -- parent
 		c = {}, -- children
@@ -52,7 +50,7 @@ function M.new_Tree(index, level, text)
 	}
 end
 
-function M.lines_to_htree(lines, offset, size, win, buf)
+function M.lines_to_htree(lines, app)
 	local nlines = vim.tbl_count(lines)
 	if string.len(lines[nlines]) == 0 then
 		table.remove(lines)
@@ -77,29 +75,28 @@ function M.lines_to_htree(lines, offset, size, win, buf)
 	ptree.active = true
 
 	-- position root
-	ptree.x = offset.x
-	ptree.y = offset.y + math.ceil(size.h / 2)
+	ptree.x = app.offset.x
+	ptree.y = app.offset.y + math.ceil(app.size.h / 2)
 
 	-- run the algo
-	M.set_base_props(ptree, ptree, win, buf)
-	M.set_sibling_props(ptree)
+	M.set_base_props(ptree, app)
+	M.set_sibling_props(ptree, app)
 
 	return ptree
 end
 
-function M.set_base_props(tree, root, win, buf)
+function M.set_base_props(tree, app)
+	tree.app = app
 	tree.nc = vim.tbl_count(tree.c)
-	tree.win = win
-	tree.buf = buf
-	tree.root = root
 	for index, child in ipairs(tree.c) do
 		child.p = tree
 		child.ci = index
-		M.set_base_props(child, root, win, buf)
+		M.set_base_props(child, app)
 	end
 end
 
-function M.set_sibling_props(tree)
+function M.set_sibling_props(tree, app)
+	local line_spacing = app.config.line_spacing
 	if tree.p == nil then
 		return
 	end
@@ -112,54 +109,21 @@ function M.set_sibling_props(tree)
 
 	for _, child in ipairs(tree.c) do
 		child.sw = sw
-		M.set_sibling_props(child)
+		M.set_sibling_props(child, app)
 	end
-end
 
-function M.open_children(tree)
-	local xpad = 4
-	local x = tree.x
-	local y = tree.y
-
-	local ypad = 1
-	local cw = 0
+	-- Set height to sum over children
+	local sh = 0
 	for _, child in ipairs(tree.p.c) do
-		cw = math.max(cw, child.w)
+		sh = sh + child.h + line_spacing
 	end
-	local ch = 0
-	for _, child in ipairs(tree.c) do
-		ch = ch + ypad + child.h
-	end
-
-	local top = y - math.ceil(ch / 2) + math.ceil(ypad / 2)
-	local h = 0
-	for index, child in ipairs(tree.c) do
-		child.x = x + cw + xpad
-		child.y = top + (index - 1) * ypad + h
-		h = h + child.h
-	end
-
-	-- TODO: draw spacer
-	P(tree.buf)
-end
-
-function M.toggle_node(tree)
-	if vim.tbl_count(tree.c) == 0 then
-		return
-	end
-
-	-- toggle status
-	tree.open = not tree.open
-
-	-- clear screen
-	M.clear_win_buf(tree.win, tree.buf)
-
-	-- run recursive render on root from scratch
-	M.render_tree(tree.root)
+	sh = sh - line_spacing
 end
 
 function M.render_tree(tree)
-	-- draw node on buffer
+	-- draw on buffer
+	a.nvim_buf_set_text(tree.app.buf, tree.y, tree.x, tree.y, tree.x + tree.w, { tree.text })
+
 	M.keymaps(tree)
 
 	if not tree.open then
@@ -176,8 +140,8 @@ end
 function M.keymaps(tree)
 	-- toggle node
 	vim.keymap.set("n", "<space>", function()
-		M.toggle_node(tree)
-		a.nvim_set_current_win(tree.win)
+		tree.open = not tree.open
+		M.render(tree.app)
 	end, { desc = "Open/Close", buffer = tree.buf })
 end
 
@@ -190,11 +154,11 @@ function M.clear_win_buf(win, buf)
 	a.nvim_win_set_cursor(win, { 1, 0 })
 end
 
-function M.render(app, lines)
-	-- create the tree
-	app.tree = M.lines_to_htree(lines, app.offset, app.size, app.win, app.buf)
+function M.render(app)
+	-- clear screen
+	M.clear_win_buf(app.win, app.buf)
 
-	-- render it
+	-- run recursive render on root from scratch
 	M.render_tree(app.tree)
 end
 

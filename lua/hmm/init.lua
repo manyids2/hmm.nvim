@@ -18,7 +18,6 @@ function M.set_offset_size(win)
 	M.size = { w = a.nvim_win_get_width(win), h = a.nvim_win_get_height(win) }
 end
 
-
 function M.setup(config)
 	-- return if not hmm file
 	local filetype = a.nvim_exec2("echo expand('%:e')", { output = true }).output
@@ -49,11 +48,11 @@ function M.setup(config)
 	M.set_offset_size(M.win)
 	t.clear_win_buf(M.win, M.buf)
 
-	-- create default tree
-	M.tree = t.new_Tree(0, 0, "root")
+	-- create tree
+	M.tree = t.lines_to_htree(lines, M)
 
-	-- create tree, render
-	t.render(M, lines)
+	-- render
+	t.render(M)
 end
 
 function M.global_keymaps()
