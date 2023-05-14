@@ -25,9 +25,10 @@ function M.new_Tree(index, tabs, text, parent)
 		-- hidden flag
 		hidden = false,
 		-- predefined properties
+		p = parent, -- parent
 		c = {}, -- children
 		cs = 0, -- count of children
-		x = 5,
+		x = tabs * 10,
 		y = 5, -- initial height
 		w = a.nvim_strwidth(text) + 2, -- width
 		h = 1, -- height
@@ -96,6 +97,14 @@ end
 
 function M.close_tree(tree)
 	tree.open = false
+	if tree.win ~= nil then
+		a.nvim_win_close(tree.win, false)
+		tree.win = nil
+	end
+	if tree.buf ~= nil then
+		a.nvim_buf_delete(tree.buf, { force = false })
+		tree.buf = nil
+	end
 	for _, child in ipairs(tree.c) do
 		M.close_tree(child)
 	end
@@ -107,9 +116,7 @@ function M.toggle_node(tree)
 		return
 	end
 
-	if tree.open then
-		M.open_children(tree)
-	else
+	if not tree.open then
 		M.close_tree(tree)
 	end
 
@@ -158,9 +165,27 @@ end
 function M.keymaps(tree)
 	-- expand node
 	vim.keymap.set("n", "<space>", function()
-		vim.notify("toggle node")
 		M.toggle_node(tree)
 	end, { desc = "Open/Close", buffer = tree.buf })
+
+	-- right
+	vim.keymap.set("n", "l", function()
+		vim.notify("right")
+		if vim.tbl_count(tree.c) == 0 then
+			return
+		end
+		if not tree.open then
+			M.toggle_node(tree)
+		end
+		a.nvim_set_current_win(tree.c[1].win)
+	end, { desc = "First child", buffer = tree.buf })
+
+	-- left
+	vim.keymap.set("n", "h", function()
+		if tree.p.win ~= nil then
+			a.nvim_set_current_win(tree.p.win)
+		end
+	end, { desc = "Parent", buffer = tree.buf })
 end
 
 function M.destroy_tree(tree)
@@ -193,7 +218,7 @@ function M.render(app)
 
 	-- render it
 	M.render_tree(app.tree)
-  P(a.nvim_list_wins())
+	P(a.nvim_list_wins())
 end
 
 return M
