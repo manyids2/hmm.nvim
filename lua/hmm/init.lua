@@ -1,5 +1,6 @@
 local a = vim.api
 local t = require("hmm.htree")
+
 local M = {}
 
 M.default_config = {
@@ -10,20 +11,9 @@ M.default_config = {
 	initial_depth = 1,
 	center_lock = false,
 	focus_lock = false,
-	max_undo_steps = 24,
-	clipboard = "os",
-	clipboard_file = "/tmp/h-m-m",
-	clipboard_in_command = "",
-	clipboard_out_command = "",
-	post_export_command = "",
-	symbol1 = "✓",
-	symbol2 = "✗",
 }
 
-M.winbufs = {}
-
-function M.set_offset_size()
-	local win = a.nvim_get_current_win()
+function M.set_offset_size(win)
 	M.offset = { x = 0, y = 0 }
 	M.size = { w = a.nvim_win_get_width(win), h = a.nvim_win_get_height(win) }
 end
@@ -40,27 +30,47 @@ function M.setup(config)
 		config = M.default_config
 	end
 	M.config = vim.tbl_extend("keep", config, M.default_config)
-	M.set_offset_size()
 
 	-- need to reopen, else nlines is 0
-	local filename = a.nvim_exec2("echo expand('%')", { output = true }).output
-	vim.cmd("e " .. filename)
+	M.filename = a.nvim_exec2("echo expand('%')", { output = true }).output
+	vim.cmd("e " .. M.filename)
+
+	-- set global keymaps
+	M.global_keymaps()
 
 	-- get win, buf
-	local buf = a.nvim_get_current_buf()
-	local win = a.nvim_get_current_win()
+	M.buf = a.nvim_get_current_buf()
+	M.win = a.nvim_get_current_win()
+	M.set_offset_size(M.win)
 
-	-- render and reset focus
-	t.render(win, M)
+	-- create default tree
+	M.tree = t.new_Tree(0, 0, "root")
+
+	-- render
+	t.render(M)
 
 	-- hot reload
 	a.nvim_create_autocmd("BufWritePost", {
 		group = a.nvim_create_augroup("hmm_save", { clear = true }),
-		buffer = buf,
+		buffer = M.buf,
 		callback = function()
-			t.render(win, M)
+			t.render(M)
+			a.nvim_set_current_win(M.tree.win)
 		end,
 	})
+end
+
+function M.global_keymaps()
+	local map = vim.keymap.set
+	-- focus root
+	map("n", "~", function()
+		a.nvim_set_current_win(M.tree.win)
+	end, { desc = "Focus root" })
+
+	-- save to source
+	map("n", "s", function()
+		vim.notify("Saved " .. M.filename)
+	end, { desc = "Save" })
 end
 
 return M

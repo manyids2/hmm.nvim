@@ -1,6 +1,7 @@
--- necessary before lazy
-vim.g.mapleader = " "
-vim.g.maplocalleader = " "
+-- space is used to toggled
+-- so different leader to prevent lag
+vim.g.mapleader = ";"
+vim.g.maplocalleader = ";"
 
 -- bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
