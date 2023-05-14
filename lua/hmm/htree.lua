@@ -12,6 +12,7 @@ function M.wrap_text(text, max_leaf_node_width)
 end
 
 function M.new_Tree(index, tabs, text, parent)
+  local w = a.nvim_strwidth(text) + 2
 	return {
 		-- our custom metada
 		index = index,
@@ -28,11 +29,12 @@ function M.new_Tree(index, tabs, text, parent)
 		p = parent, -- parent
 		c = {}, -- children
 		ci = 0, -- ith child
+    sw = w, -- width of siblings
 		x = 0,
 		y = 0, -- initial height
-		w = a.nvim_strwidth(text) + 2, -- width
+		w = w, -- width
 		h = 1, -- height
-		tw = a.nvim_strwidth(text) + 2, -- width of tree
+		tw = w, -- width of tree
 		th = 1, -- height of tree
 	}
 end
@@ -104,7 +106,7 @@ function M.open_children(tree)
 	for _, child in ipairs(tree.c) do
 		ch = ch + ypad + child.h
 	end
-	-- local nc = vim.tbl_count(tree.c)
+
 	local top = y - math.ceil(ch / 2) + math.ceil(ypad / 2)
 	local h = 0
 	for index, child in ipairs(tree.c) do
@@ -112,6 +114,9 @@ function M.open_children(tree)
 		child.y = top + (index - 1) * ypad + h
 		h = h + child.h
 	end
+
+  -- TODO: draw spacer
+
 end
 
 function M.close_children_recursive(tree)
