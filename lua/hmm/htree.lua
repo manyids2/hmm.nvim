@@ -34,8 +34,8 @@ function M.new_Tree(index, level, text)
 		-- tree props
 		tx = 0,
 		ty = 0,
-		tw = 0,
-		th = 0,
+		tw = w,
+		th = 1,
 	}
 end
 
@@ -77,6 +77,7 @@ function M.lines_to_htree(lines, app)
 	-- run the algo
 	M.set_base_props(ptree, app)
 	M.set_child_props(ptree, app)
+	M.set_tree_props(ptree, app)
 
 	-- position root
 	ptree.x = app.offset.x
@@ -99,26 +100,32 @@ end
 function M.set_child_props(tree, app)
 	local line_spacing = app.config.line_spacing
 
-	-- Compute max width across childs
+	-- compute max width across childs
 	local cw = tree.w
 	for _, child in ipairs(tree.c) do
 		cw = math.max(cw, child.w)
 	end
 
-	-- Compute height across childs assuming closed
+	-- compute height across childs assuming closed
 	local ch = 0
 	for _, child in ipairs(tree.c) do
 		ch = ch + child.h + line_spacing
 	end
-
 	ch = math.max(0, ch - line_spacing)
 
+	-- set for tree
 	tree.cw = cw
 	tree.ch = ch
 
-	-- Set width, height
+	-- recurse over children
 	for _, child in ipairs(tree.c) do
 		M.set_child_props(child, app)
+	end
+end
+
+function M.set_tree_props(tree, app)
+	for _, child in ipairs(tree.c) do
+		M.set_tree_props(child, app)
 	end
 end
 
@@ -133,8 +140,6 @@ function M.draw_spacer(tree)
 		return
 	end
 	local r = tree.c[1].x - tree.x - tree.w
-	print(tree.c[1].x, tree.x, tree.w)
-	print(r)
 	a.nvim_buf_set_text(
 		tree.app.buf,
 		tree.y,
@@ -169,6 +174,8 @@ function M.first_walk(tree, config)
 		cw = tree.p.cw
 	end
 
+	M.adjust_siblings(tree, config)
+
 	if vim.tbl_count(tree.c) > 0 then
 		local top = -math.floor(tree.ch / 2)
 		for _, child in ipairs(tree.c) do
@@ -177,6 +184,44 @@ function M.first_walk(tree, config)
 			child.y = tree.y + top
 			top = top + config.line_spacing + child.h
 			M.first_walk(child, config)
+		end
+	end
+end
+
+function M.adjust_siblings(tree, config)
+	if not tree.open then
+		return
+	end
+	if vim.tbl_count(tree.c) == 0 then
+		return
+	end
+	if tree.p == nil then
+		return
+	end
+
+	-- adjust siblings
+	-- local ls = config.line_spacing
+	for _, sibling in ipairs(tree.p.c) do
+		local offset = { x = 0, y = 0 }
+		if sibling.si < tree.si then
+			offset = { x = 0, y = -math.floor(tree.ch / 2) }
+			M.move_tree(sibling, offset)
+		elseif sibling.si > tree.si then
+			offset = { x = 0, y = math.floor(tree.ch / 2) }
+			M.move_tree(sibling, offset)
+		end
+	end
+end
+
+function M.move_tree(tree, offset)
+	tree.x = tree.x + offset.x
+	tree.y = tree.y + offset.y
+	if not tree.open then
+		return
+	end
+	if vim.tbl_count(tree.c) > 0 then
+		for _, child in ipairs(tree.c) do
+			M.move_tree(child, offset)
 		end
 	end
 end
