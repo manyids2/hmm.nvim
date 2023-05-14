@@ -31,16 +31,6 @@ function M.new_Tree(index, tabs, text)
 		h = 1, -- height
 		tw = a.nvim_strwidth(text) + 2, -- width of tree
 		th = 1, -- height of tree
-		prelim = 0,
-		mod = 0,
-		shift = 0,
-		change = 0,
-		tl = nil, -- left thread
-		tr = nil, -- right thread
-		el = nil, -- left extreme node
-		er = nil, -- right extreme node
-		msel = 0, -- sum of left modifiers
-		mser = 0, -- sum of right modifiers
 	}
 end
 
@@ -69,6 +59,7 @@ function M.lines_to_htree(lines, app)
 	-- -- run the algo
 	M.set_hw(ptree)
 	-- p.second_walk(ptree, 1)
+	P(ptree)
 
 	return ptree
 end
@@ -82,7 +73,7 @@ function M.set_hw(tree)
 	for _, child in ipairs(tree.c) do
 		M.set_hw(child)
 		size.h = size.h + child.th
-		size.w = math.max(size.w + child.tw)
+		size.w = math.max(size.w, child.tw)
 	end
 	tree.th = size.h
 	tree.tw = size.w
