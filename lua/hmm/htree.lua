@@ -11,8 +11,8 @@ function M.wrap_text(text, max_leaf_node_width)
 	P(a.nvim_buf_get_lines(buf, 0, -1, false))
 end
 
-function M.new_Tree(index, tabs, text, parent)
-  local w = a.nvim_strwidth(text) + 2
+function M.new_Tree(index, tabs, text, parent, bwin, bbuf)
+	local w = a.nvim_strwidth(text) + 2
 	return {
 		-- our custom metada
 		index = index,
@@ -23,13 +23,16 @@ function M.new_Tree(index, tabs, text, parent)
 		-- win, buf
 		win = nil,
 		buf = nil,
-		-- hidden flag
-		hidden = false,
+		bwin = bwin,
+		bbuf = bbuf,
+		root = nil,
 		-- predefined properties
 		p = parent, -- parent
 		c = {}, -- children
+		nc = 0, -- number of children
 		ci = 0, -- ith child
-    sw = w, -- width of siblings
+		sw = w, -- width of siblings
+		sh = 1, -- height of siblings
 		x = 0,
 		y = 0, -- initial height
 		w = w, -- width
@@ -39,13 +42,18 @@ function M.new_Tree(index, tabs, text, parent)
 	}
 end
 
-function M.lines_to_htree(lines, offset, size)
-	local root = { M.new_Tree(0, 0, "root", nil) }
+function M.lines_to_htree(lines, offset, size, bwin, bbuf)
+	local nlines = vim.tbl_count(lines)
+	if string.len(lines[nlines]) == 0 then
+		table.remove(lines)
+	end
+
+	local root = { M.new_Tree(0, 0, "root", nil, bwin, bbuf) }
 	local nodes = {}
 	for index, line in ipairs(lines) do
 		local tabs = vim.tbl_count(vim.split(line, "\t", {}))
 		line = vim.trim(line)
-		local node = M.new_Tree(index, tabs, line, root[tabs])
+		local node = M.new_Tree(index, tabs, line, root[tabs], bwin, bbuf)
 		table.insert(nodes, node)
 		if root[tabs] ~= nil then
 			table.insert(root[tabs].c, node)
@@ -61,7 +69,7 @@ function M.lines_to_htree(lines, offset, size)
 	ptree.y = offset.y + math.ceil(size.h / 2)
 
 	-- run the algo
-	M.set_ci(ptree)
+	M.set_cincroot(ptree, ptree)
 	M.set_hw(ptree)
 
 	-- open root only for now
@@ -70,10 +78,12 @@ function M.lines_to_htree(lines, offset, size)
 	return ptree
 end
 
-function M.set_ci(tree)
+function M.set_cincroot(tree, root)
+	tree.nc = vim.tbl_count(tree.c)
+	tree.root = root
 	for index, child in ipairs(tree.c) do
 		child.ci = index
-		M.set_ci(child)
+		M.set_cincroot(child, root)
 	end
 end
 
@@ -115,12 +125,11 @@ function M.open_children(tree)
 		h = h + child.h
 	end
 
-  -- TODO: draw spacer
-
+	-- TODO: draw spacer
+	P(tree.bbuf)
 end
 
 function M.close_children_recursive(tree)
-	tree.open = false
 	if tree.win ~= nil then
 		a.nvim_win_close(tree.win, false)
 		tree.win = nil
@@ -146,7 +155,8 @@ function M.toggle_node(tree)
 		M.close_children_recursive(tree)
 	end
 
-	M.render_tree(tree)
+	M.clear_win_buf(tree.bwin, tree.bbuf)
+	M.render_tree(tree.root)
 end
 
 function M.render_tree(tree)
@@ -180,6 +190,9 @@ function M.render_tree(tree)
 	if not tree.open then
 		return
 	end
+
+	local xpad = 4
+	a.nvim_buf_set_text(tree.bbuf, tree.y, tree.x + tree.w, tree.y, tree.x + tree.w + xpad, { string.rep("-", xpad) })
 
 	if vim.tbl_count(tree.c) > 0 then
 		for _, child in ipairs(tree.c) do
@@ -236,6 +249,15 @@ function M.keymaps(tree)
 	end, { desc = "Next sibling", buffer = tree.buf })
 end
 
+function M.clear_win_buf(win, buf)
+	local size = { w = a.nvim_win_get_width(win), h = a.nvim_win_get_height(win) }
+	local replacement = { string.rep(" ", size.w) }
+	for i = 0, size.h, 1 do
+		a.nvim_buf_set_lines(buf, i, i, false, replacement)
+	end
+	a.nvim_win_set_cursor(win, { 1, 0 })
+end
+
 function M.destroy_tree(tree)
 	if vim.tbl_count(tree.c) > 0 then
 		for _, child in ipairs(tree.c) do
@@ -250,19 +272,12 @@ function M.destroy_tree(tree)
 	end
 end
 
-function M.render(app)
+function M.render(app, lines)
 	-- Destroy current
 	M.destroy_tree(app.tree)
 
-	-- Get the content
-	local lines = a.nvim_buf_get_lines(app.buf, 0, -1, false)
-	local nlines = vim.tbl_count(lines)
-	if string.len(lines[nlines]) == 0 then
-		table.remove(lines)
-	end
-
 	-- create the tree
-	app.tree = M.lines_to_htree(lines, app.offset, app.size)
+	app.tree = M.lines_to_htree(lines, app.offset, app.size, app.win, app.buf)
 
 	-- render it
 	M.render_tree(app.tree)

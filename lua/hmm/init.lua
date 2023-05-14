@@ -18,6 +18,7 @@ function M.set_offset_size(win)
 	M.size = { w = a.nvim_win_get_width(win), h = a.nvim_win_get_height(win) }
 end
 
+
 function M.setup(config)
 	-- return if not hmm file
 	local filetype = a.nvim_exec2("echo expand('%:e')", { output = true }).output
@@ -35,38 +36,33 @@ function M.setup(config)
 	M.filename = a.nvim_exec2("echo expand('%')", { output = true }).output
 	vim.cmd("e " .. M.filename)
 
+	-- Get the content
+	local lines = a.nvim_buf_get_lines(a.nvim_get_current_buf(), 0, -1, false)
+
 	-- set global keymaps
 	M.global_keymaps()
 
 	-- get win, buf
-	M.buf = a.nvim_get_current_buf()
+	M.buf = a.nvim_create_buf(false, true)
 	M.win = a.nvim_get_current_win()
+	a.nvim_win_set_buf(M.win, M.buf)
 	M.set_offset_size(M.win)
+	t.clear_win_buf(M.win, M.buf)
 
 	-- create default tree
 	M.tree = t.new_Tree(0, 0, "root")
 
-	-- render
-	t.render(M)
+	-- create tree, render
+	t.render(M, lines)
 
 	-- open root
-  t.open_children(M.tree)
-
-	-- hot reload
-	a.nvim_create_autocmd("BufWritePost", {
-		group = a.nvim_create_augroup("hmm_save", { clear = true }),
-		buffer = M.buf,
-		callback = function()
-			t.render(M)
-			a.nvim_set_current_win(M.tree.win)
-		end,
-	})
+	t.open_children(M.tree)
 end
 
 function M.global_keymaps()
 	local map = vim.keymap.set
 	-- focus root
-	map("n", "~", function()
+	map("n", "m", function()
 		a.nvim_set_current_win(M.tree.win)
 	end, { desc = "Focus root" })
 
