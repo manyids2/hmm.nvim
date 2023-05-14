@@ -28,8 +28,8 @@ function M.new_Tree(index, tabs, text, parent)
 		p = parent, -- parent
 		c = {}, -- children
 		ci = 0, -- ith child
-		x = tabs * 10,
-		y = 5, -- initial height
+		x = 0,
+		y = 0, -- initial height
 		w = a.nvim_strwidth(text) + 2, -- width
 		h = 1, -- height
 		tw = a.nvim_strwidth(text) + 2, -- width of tree
@@ -55,13 +55,15 @@ function M.lines_to_htree(lines, offset, size)
 	local ptree = root[1].c[1]
 	ptree.open = true
 	ptree.active = true
-
 	ptree.x = offset.x
 	ptree.y = offset.y + math.ceil(size.h / 2)
 
-	-- -- run the algo
+	-- run the algo
 	M.set_ci(ptree)
 	M.set_hw(ptree)
+
+	-- open root only for now
+	M.open_children(ptree)
 
 	return ptree
 end
@@ -89,13 +91,30 @@ function M.set_hw(tree)
 end
 
 function M.open_children(tree)
-	tree.open = true
+	local xpad = 4
+	local x = tree.x
+	local y = tree.y
+
+	local ypad = 1
+	local cw = 0
+	for _, child in ipairs(tree.p.c) do
+		cw = math.max(cw, child.w)
+	end
+	local ch = 0
 	for _, child in ipairs(tree.c) do
-		child.open = true
+		ch = ch + ypad + child.h
+	end
+	-- local nc = vim.tbl_count(tree.c)
+	local top = y - math.ceil(ch / 2) + math.ceil(ypad / 2)
+	local h = 0
+	for index, child in ipairs(tree.c) do
+		child.x = x + cw + xpad
+		child.y = top + (index - 1) * ypad + h
+		h = h + child.h
 	end
 end
 
-function M.close_tree(tree)
+function M.close_children_recursive(tree)
 	tree.open = false
 	if tree.win ~= nil then
 		a.nvim_win_close(tree.win, false)
@@ -106,7 +125,7 @@ function M.close_tree(tree)
 		tree.buf = nil
 	end
 	for _, child in ipairs(tree.c) do
-		M.close_tree(child)
+		M.close_children_recursive(child)
 	end
 end
 
@@ -116,8 +135,10 @@ function M.toggle_node(tree)
 		return
 	end
 
-	if not tree.open then
-		M.close_tree(tree)
+	if tree.open then
+		M.open_children(tree)
+	else
+		M.close_children_recursive(tree)
 	end
 
 	M.render_tree(tree)
@@ -163,9 +184,10 @@ function M.render_tree(tree)
 end
 
 function M.keymaps(tree)
-	-- expand node
+	-- toggle node
 	vim.keymap.set("n", "<space>", function()
 		M.toggle_node(tree)
+		a.nvim_set_current_win(tree.win)
 	end, { desc = "Open/Close", buffer = tree.buf })
 
 	-- right
@@ -177,7 +199,8 @@ function M.keymaps(tree)
 		if not tree.open then
 			M.toggle_node(tree)
 		end
-		a.nvim_set_current_win(tree.c[1].win)
+		local middle = math.ceil(vim.tbl_count(tree.c) / 2)
+		a.nvim_set_current_win(tree.c[middle].win)
 	end, { desc = "First child", buffer = tree.buf })
 
 	-- left

@@ -49,6 +49,9 @@ function M.setup(config)
 	-- render
 	t.render(M)
 
+	-- open root
+  t.open_children(M.tree)
+
 	-- hot reload
 	a.nvim_create_autocmd("BufWritePost", {
 		group = a.nvim_create_augroup("hmm_save", { clear = true }),
