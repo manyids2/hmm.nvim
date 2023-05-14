@@ -156,11 +156,12 @@ function M.clear_win_buf(win, buf)
 	for i = 0, size.h, 1 do
 		a.nvim_buf_set_lines(buf, i, i, false, replacement)
 	end
-	a.nvim_win_set_cursor(win, { 1, 0 })
 end
 
 function M.focus_active(app)
 	local active = app.active
+	a.nvim_set_current_buf(app.buf)
+	a.nvim_set_current_win(app.win)
 	a.nvim_win_set_cursor(app.win, { active.y + 1, active.x })
 end
 

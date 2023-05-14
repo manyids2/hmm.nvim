@@ -40,10 +40,18 @@ function M.setup(config)
 	local lines = a.nvim_buf_get_lines(a.nvim_get_current_buf(), 0, -1, false)
 
 	-- get win, buf
+	M.set_offset_size(a.nvim_get_current_win())
 	M.buf = a.nvim_create_buf(false, true)
-	M.win = a.nvim_get_current_win()
-	a.nvim_win_set_buf(M.win, M.buf)
-	M.set_offset_size(M.win)
+	local opts = {
+		relative = "editor",
+		col = M.offset.x,
+		row = M.offset.y,
+		width = M.size.w,
+		height = M.size.h,
+		zindex = 20,
+		style = "minimal",
+	}
+	M.win = a.nvim_open_win(M.buf, true, opts)
 	t.clear_win_buf(M.win, M.buf)
 
 	-- create tree
@@ -55,6 +63,9 @@ function M.setup(config)
 
 	-- render
 	t.render(M)
+
+	-- somehow, cant get it to focus on the new window
+	a.nvim_win_set_cursor(M.win, { M.active.y + 1, M.active.x })
 end
 
 return M

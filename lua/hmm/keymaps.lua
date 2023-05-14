@@ -57,6 +57,11 @@ end
 function M.global_keymaps(app)
 	local map = vim.keymap.set
 
+	-- focus active
+	map("n", "f", function()
+		t.focus_active(app)
+	end, { desc = "Focus" })
+
 	-- save to source
 	map("n", "s", function()
 		vim.notify("Saved " .. app.filename)
@@ -64,9 +69,8 @@ function M.global_keymaps(app)
 
 	-- toggle node
 	map("n", "<space>", function()
-		vim.notify(app.active.text)
 		M.toggle(app)
-	end, { buffer = app.buf, desc = "Save" })
+	end, { buffer = app.buf, desc = "Toggle" })
 
 	-- navigation
 	map("n", "j", function()
