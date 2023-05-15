@@ -2,7 +2,21 @@ local a = vim.api
 local M = {}
 
 M.symbols = {
-	spacer = "------",
+	spacer = "──────",
+	bs = " ",
+	bh = "─",
+	bv = "│",
+	bt = "╭",
+	bb = "╰",
+	bj = "├",
+	m = 3,
+}
+
+M.Default = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
+
+M.highlights = {
+	active = a.nvim_create_namespace("active"),
+	spacer = a.nvim_create_namespace("spacer"),
 }
 
 function M.new_Tree(index, level, text)
@@ -140,14 +154,78 @@ function M.draw_spacer(tree)
 		return
 	end
 	local r = tree.c[1].x - tree.x - tree.w
-	a.nvim_buf_set_text(
-		tree.app.buf,
-		tree.y,
-		tree.x + tree.w,
-		tree.y,
-		tree.x + tree.w + r,
-		{ string.rep(string.sub(M.symbols.spacer, 1, 1), r) }
-	)
+	local m = math.max(math.ceil(2 * r / 3), 3)
+
+	local spacer
+	tree.spacers = {}
+
+	-- Horizontal line
+	local opts = {
+		end_col = tree.x + tree.w + m,
+		virt_text_win_col = tree.x + tree.w,
+		virt_text_pos = "overlay",
+		virt_text = { { string.rep(M.symbols.bh, m), "Float" } },
+	}
+	spacer = a.nvim_buf_set_extmark(tree.app.buf, M.highlights.spacer, tree.y, tree.x + tree.w, opts)
+	table.insert(tree.spacers, spacer)
+
+	if tree.nc == 1 then
+		return
+	else
+		-- vertical line
+		for y = 1, tree.c[tree.nc].y - tree.c[1].y - 1 do
+			-- rest
+			opts = {
+				end_col = tree.x + tree.w + m + 1,
+				virt_text_win_col = tree.x + tree.w + m,
+				virt_text_pos = "overlay",
+				virt_text = { { M.symbols.bv, "Float" } },
+			}
+			spacer =
+				a.nvim_buf_set_extmark(tree.app.buf, M.highlights.spacer, tree.c[1].y + y, tree.x + tree.w + m, opts)
+			table.insert(tree.spacers, spacer)
+		end
+
+		-- top child
+		opts = {
+			end_col = tree.x + tree.w + r,
+			virt_text_win_col = tree.x + tree.w + m,
+			virt_text_pos = "overlay",
+			virt_text = {
+				{ M.symbols.bt .. string.rep(M.symbols.bh, r - m - 1), "Float" },
+			},
+		}
+		spacer = a.nvim_buf_set_extmark(tree.app.buf, M.highlights.spacer, tree.c[1].y, tree.x + tree.w + m, opts)
+		table.insert(tree.spacers, spacer)
+
+		-- bottom child
+		opts = {
+			end_col = tree.x + tree.w + r,
+			virt_text_win_col = tree.x + tree.w + m,
+			virt_text_pos = "overlay",
+			virt_text = {
+				{ M.symbols.bb .. string.rep(M.symbols.bh, r - m - 1), "Float" },
+			},
+		}
+		spacer = a.nvim_buf_set_extmark(tree.app.buf, M.highlights.spacer, tree.c[tree.nc].y, tree.x + tree.w + m, opts)
+		table.insert(tree.spacers, spacer)
+
+		-- rest
+		for index, child in ipairs(tree.c) do
+			if index ~= 1 and index ~= tree.nc then
+				opts = {
+					end_col = tree.x + tree.w + r,
+					virt_text_win_col = tree.x + tree.w + m,
+					virt_text_pos = "overlay",
+					virt_text = {
+						{ M.symbols.bj .. string.rep(M.symbols.bh, r - m - 1), "Float" },
+					},
+				}
+				spacer = a.nvim_buf_set_extmark(tree.app.buf, M.highlights.spacer, child.y, tree.x + tree.w + m, opts)
+				table.insert(tree.spacers, spacer)
+			end
+		end
+	end
 end
 
 function M.clear_win_buf(win, buf)
@@ -163,6 +241,8 @@ function M.focus_active(app)
 	a.nvim_set_current_buf(app.buf)
 	a.nvim_set_current_win(app.win)
 	a.nvim_win_set_cursor(app.win, { active.y + 1, active.x })
+	a.nvim_buf_clear_namespace(app.buf, M.highlights.active, 0, -1)
+	a.nvim_buf_add_highlight(app.buf, M.highlights.active, "IncSearch", active.y, active.x, active.x + active.w)
 end
 
 function M.first_walk(tree, config)
@@ -170,18 +250,11 @@ function M.first_walk(tree, config)
 		return
 	end
 
-	local cw = tree.w
-	if tree.p ~= nil then
-		cw = tree.p.cw
-	end
-
 	M.adjust_siblings(tree, config)
-
 	if vim.tbl_count(tree.c) > 0 then
 		local top = -math.floor(tree.ch / 2)
 		for _, child in ipairs(tree.c) do
-			-- child.x = tree.x + tree.cw + string.len(M.symbols.spacer)
-			child.x = tree.x + cw + string.len(M.symbols.spacer)
+			child.x = tree.x + tree.cw + a.nvim_strwidth(M.symbols.spacer)
 			child.y = tree.y + top
 			top = top + config.line_spacing + child.h
 			M.first_walk(child, config)
