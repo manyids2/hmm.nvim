@@ -1,10 +1,11 @@
 local t = require("hmm.htree")
+local r = require("hmm.render")
 
 local M = {}
 
 function M.toggle(app)
 	app.active.open = not app.active.open
-	t.render(app)
+	r.render(app)
 end
 
 function M.left(app)
@@ -13,7 +14,7 @@ function M.left(app)
 		return
 	end
 	app.active = active.p
-	t.focus_active(app)
+	r.focus_active(app)
 end
 
 function M.right(app)
@@ -23,10 +24,10 @@ function M.right(app)
 	end
 	if not active.open then
 		active.open = true
-		t.render(app)
+		r.render(app)
 	else
 		app.active = active.c[math.ceil(active.nc / 2)]
-		t.focus_active(app)
+		r.focus_active(app)
 	end
 end
 
@@ -39,7 +40,7 @@ function M.up(app)
 		return
 	end
 	app.active = active.p.c[math.max(1, active.si - 1)]
-	t.focus_active(app)
+	r.focus_active(app)
 end
 
 function M.down(app)
@@ -51,7 +52,7 @@ function M.down(app)
 		return
 	end
 	app.active = active.p.c[math.min(active.ns, active.si + 1)]
-	t.focus_active(app)
+	r.focus_active(app)
 end
 
 function M.global_keymaps(app)
@@ -59,7 +60,7 @@ function M.global_keymaps(app)
 
 	-- focus active
 	map("n", "f", function()
-		t.focus_active(app)
+		r.focus_active(app)
 	end, { desc = "Focus" })
 
 	-- save to source

@@ -1,8 +1,11 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from dataclasses import dataclass
 from pathlib import Path
 
 from rich import print as P
+from PIL import Image
+from distinctipy import distinctipy
+from term_image.image import AutoImage as a
 
 
 def lines_to_tree(lines) -> "Tree":
@@ -66,7 +69,7 @@ class Tree:
     def __post_init__(self):
         self.c: List["Tree"] = []  # children
         self.h, self.w = 1, len(self.text)
-        self.y = self.level * 2  # For now, layered tree
+        self.y = self.level  # For now, layered tree
         self.x: float = 0  # What we need to calculate
 
     @property
@@ -152,6 +155,7 @@ def distribute_extra(t: Tree, i: int, si: int, dist: float) -> None:
 
 
 def move_subtree(t: Tree, i: int, si: int, dist: float) -> None:
+    print(f"Moving: {t.c[i].text:5s} : {i}, {si}, {dist}")
     # Move subtree by changing mod
     t.c[i].mod += dist
     t.c[i].msel += dist
@@ -159,9 +163,9 @@ def move_subtree(t: Tree, i: int, si: int, dist: float) -> None:
     # TODO: i = si occurs here
     if i != si:
         distribute_extra(t, i, si, dist)
-    else:
-        print(f"i == si : {i} == {si} : {t}")
-        P(t)
+    # else:
+    #     print(f"i == si : {i} == {si} : {t}")
+    #     P(t)
 
 
 def seperate(t: Tree, i: int, ih: Optional[IYL]):
@@ -251,18 +255,50 @@ def second_walk(t: Tree, modsum: float):
         second_walk(child, modsum)
 
 
-if __name__ == "__main__":
-    # from PIL import Image
-    # from term_image.image import AutoImage as a
+def layout(t: Tree):
+    for child in t.c:
+        layout(child)
+    first_walk(t)
+    second_walk(t, 0)
 
+
+def get_max_size(t: Tree, size: Tuple[int, int]):
+    size = max(size[0], int(t.x + t.w)), max(size[1], int(t.y + t.h))
+    for child in t.c:
+        size = get_max_size(child, size)
+    return size
+
+
+def render_tree(t: Tree, image: Image.Image):
+    x, y, h, w = int(t.x), int(t.y), t.h, t.w
+    x, y, h, w = [v for v in [x, y, h, w]]
+    image.paste(
+        Image.new("RGB", (w, h), color=COLORS[t.index]),
+        (x, y),
+    )
+    # print(t.text, t.index, x, y, h, w)
+    for child in t.c:
+        render_tree(child, image)
+    return image
+
+
+def show(t: Tree) -> Image.Image:
+    image = Image.new("RGB", get_max_size(t, (0, 0)), color="black")
+    render = render_tree(t, image)
+    print(a(render))
+    return render
+
+
+if __name__ == "__main__":
     # Create the tree
     lines = Path("./data/simple.hmm").read_text().split("\n")
+    COLORS = {
+        i: tuple(int(x * 255) for x in c)
+        for i, c in enumerate(distinctipy.get_colors(len(lines)))
+    }
+
     tree = lines_to_tree(lines)
-    # P(tree)
+    show(tree)
 
-    first_walk(tree)
-    second_walk(tree, 0)
-    # P(tree.c)
-
-    # image = Image.new("RGB", (500, 300), color="black")
-    # print(a(image))
+    layout(tree)
+    show(tree)

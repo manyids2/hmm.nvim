@@ -1,0 +1,97 @@
+local a = vim.api
+local t = require("hmm.htree")
+
+local M = {}
+
+M.symbols = {
+	spacer = "──────",
+	bs = " ",
+	bh = "─",
+	bv = "│",
+	bt = "╭",
+	bb = "╰",
+	bj = "├",
+	m = 3,
+}
+
+M.Default = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
+
+M.highlights = {
+	active = { space = a.nvim_create_namespace("active"), color = "Float" },
+	spacer = { space = a.nvim_create_namespace("spacer"), color = "IncSearch" },
+}
+
+function M.clear_win_buf(buf, size)
+	-- clear active, spacers
+	a.nvim_buf_clear_namespace(buf, M.highlights.active.space, 0, -1)
+	a.nvim_buf_clear_namespace(buf, M.highlights.spacer.space, 0, -1)
+
+	-- replace existing
+	local replacement = { string.rep(" ", size.w) }
+	for i = 0, size.h, 1 do
+		a.nvim_buf_set_lines(buf, i, i, false, replacement)
+	end
+
+	-- delete remaining
+	local old_h = a.nvim_buf_line_count(buf)
+	a.nvim_buf_set_lines(buf, size.h, old_h + 1, false, {})
+end
+
+function M.focus_active(app)
+	local active = app.active
+	a.nvim_set_current_buf(app.buf)
+	a.nvim_set_current_win(app.win)
+	a.nvim_win_set_cursor(app.win, { active.y + 1, active.x })
+	a.nvim_buf_clear_namespace(app.buf, M.highlights.active.space, 0, -1)
+	M.draw_node(app.active)
+	a.nvim_buf_add_highlight(
+		app.buf,
+		M.highlights.active.space,
+		M.highlights.active.color,
+		active.y,
+		active.x,
+		active.x + active.w
+	)
+end
+
+function M.draw_node(tree)
+	a.nvim_buf_set_text(tree.app.buf, tree.y, tree.x, tree.y, tree.x + tree.w, { " " .. tree.text .. " " })
+end
+
+function M.draw_virt(buf, start_row, start_col, end_col, virt_text, highlight)
+	local opts = {
+		end_col = end_col,
+		virt_text_win_col = start_col,
+		virt_text_pos = "overlay",
+		virt_text = { { virt_text, highlight.color } },
+	}
+	a.nvim_buf_set_extmark(buf, M.highlights.spacer.space, start_row, start_col, opts)
+end
+
+function M.render_tree(tree)
+	M.draw_node(tree)
+	if not tree.open then
+		return
+	end
+
+	if vim.tbl_count(tree.c) > 0 then
+		-- M.draw_spacer(tree)
+		for _, child in ipairs(tree.c) do
+			M.render_tree(child)
+		end
+	end
+end
+
+function M.render(app)
+	-- recompute layout
+	t.set_props(app.tree, 1, nil, app)
+
+	-- reset buffer
+	local size = { h = app.tree.th, w = app.tree.tw }
+  P(size)
+	M.clear_win_buf(app.buf, size)
+	M.render_tree(app.tree)
+	M.focus_active(app)
+end
+
+return M

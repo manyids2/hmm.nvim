@@ -98,6 +98,27 @@ files = [
 ]
 
 [[package]]
+name = "distinctipy"
+version = "1.2.2"
+description = "A lightweight package for generating visually distinct colours."
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "distinctipy-1.2.2-py3-none-any.whl", hash = "sha256:deab7bbabf488c7be5051559c428c1cb4a5e78681cbb8e5156c513465a8d85bf"},
+    {file = "distinctipy-1.2.2.tar.gz", hash = "sha256:8145a422766a7e653549d8bec2978c0b8225f91a6d08bece46228c44a5ec962b"},
+]
+
+[package.dependencies]
+numpy = "*"
+
+[package.extras]
+all = ["black", "codecov", "coverage", "flake8", "isort", "matplotlib", "nbsphinx", "numpy", "pandas", "pytest", "pytest-cov", "sphinx-rtd-theme"]
+docs = ["nbsphinx", "sphinx-rtd-theme"]
+optional = ["matplotlib", "pandas"]
+tests = ["black", "codecov", "coverage", "flake8", "isort", "pytest", "pytest-cov"]
+
+[[package]]
 name = "idna"
 version = "3.4"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -454,4 +475,4 @@ dev = ["black", "pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10.0"
-content-hash = "722f21d9553e3825c71c8c951fb651e1cfd6ae5c3a75a6d101f33e82d75c52ce"
+content-hash = "a89b8223b4d70883411a4ee96944bbfe4eff53b6bb7678289fb18a9a9256cdf9"
