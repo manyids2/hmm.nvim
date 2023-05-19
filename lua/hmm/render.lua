@@ -26,7 +26,8 @@ M.highlights = {
 
 function M.clear_win_buf(buf, size, offset)
 	-- clear active, spacers
-	local w = size.w + a.nvim_strwidth(M.symbols.hc)
+	-- TODO: why does it overflow? need margin of 10 here
+	local w = size.w + a.nvim_strwidth(M.symbols.hc) + 10
 	a.nvim_buf_clear_namespace(buf, M.highlights.active.space, 0, -1)
 	a.nvim_buf_clear_namespace(buf, M.highlights.spacer.space, 0, -1)
 	local replacement = { string.rep(" ", w) }

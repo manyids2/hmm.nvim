@@ -24,7 +24,7 @@ function M.new_Tree(index, level, text)
 		o = 0,
 		-- child props
 		cw = 0,
-		ch = 0,
+		ch = 1,
 		-- tree props
 		tw = w,
 		th = 1,
@@ -34,11 +34,11 @@ end
 
 function M.print_tree(t)
 	print(string.format("index: %d; level: %d; text: %s", t.index, t.level, t.text))
-	print(string.format("nc: %d; ns: %d; si: %d", t.nc, t.ns, t.si))
-	print(string.format(" x: %d;  y: %d;  w: %d;  h: %d", t.x, t.y, t.w, t.h))
-	print(string.format("cx: %d; cy: %d; cw: %d; ch: %d", t.cx, t.cy, t.cw, t.ch))
-	print(string.format("tx: %d; ty: %d; tw: %d; th: %d", t.tx, t.ty, t.tw, t.th))
-	print(string.format("spacer: %d", string.len(M.symbols.spacer)))
+	print(string.format("open: %s; nc: %d", tostring(t.open), t.nc))
+	print(string.format("ns: %d; si: %d", t.ns, t.si))
+	print(string.format("cw: %d; ch: %d", t.cw, t.ch))
+	print(string.format("tw: %d; th: %d; o %d", t.tw, t.th, t.o))
+  print(string.format(" x: %d;  y: %d;  w: %d;  h: %d", t.x, t.y, t.w, t.h))
 end
 
 function M.lines_to_htree(lines, app)
@@ -78,7 +78,7 @@ function M.set_props(tree, si, parent, app)
 	if parent ~= nil then
 		tree.p = parent
 		tree.si = si
-		tree.ns = tree.p.nc
+		tree.ns = vim.tbl_count(tree.p.c)
 		-- can already set x for layered tree
 		tree.x = parent.x + parent.w + config.margin
 	end
@@ -86,13 +86,14 @@ function M.set_props(tree, si, parent, app)
 	if not tree.open then
 		tree.nc = 0
 		-- reset
-		tree.ch = 1
+		tree.ch = 1 + config.line_spacing
 		tree.cw = 0
 		tree.th = 1 + config.line_spacing
 		tree.tw = tree.w
+		tree.o = 0
 		return
 	end
-  tree.nc = vim.tbl_count(tree.c)
+	tree.nc = vim.tbl_count(tree.c)
 	-- recurse
 	local ch = 0
 	local cw = 0
@@ -107,6 +108,7 @@ function M.set_props(tree, si, parent, app)
 	-- tree relevant props
 	tree.th = ch
 	tree.tw = tree.cw + config.margin + tree.w
+	tree.o = 0
 end
 
 function M.set_y(tree, config)
@@ -117,6 +119,29 @@ function M.set_y(tree, config)
 		bottom = bottom + child.th
 	end
 	tree.o = math.floor(tree.th / 2) - 1
+end
+
+function M.delete_node(tree, app)
+	if tree.p == nil then
+		return
+	end
+	-- if only child
+	if vim.tbl_count(tree.p.c) == 1 then
+		tree.p.c = {}
+		tree.p.nc = 0
+		tree.p.open = false
+		app.active = tree.p
+	else
+		local cc = {}
+		for index, child in ipairs(tree.p.c) do
+			if index ~= tree.si then
+				table.insert(cc, child)
+			end
+		end
+		tree.p.c = cc
+		tree.p.nc = vim.tbl_count(cc)
+		app.active = tree.p.c[math.max(tree.si - 1, 1)]
+	end
 end
 
 return M

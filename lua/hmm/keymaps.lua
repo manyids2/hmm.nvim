@@ -73,6 +73,12 @@ function M.down(app)
 	r.focus_active(app)
 end
 
+function M.delete(app)
+	local active = app.active
+  t.delete_node(active, app)
+  r.render(app)
+end
+
 function M.global_keymaps(app)
 	local map = vim.keymap.set
 
@@ -107,6 +113,11 @@ function M.global_keymaps(app)
 	map("n", "l", function()
 		M.right(app)
 	end, { buffer = app.buf, desc = "Right" })
+
+	map("n", "d", function()
+		M.delete(app)
+	end, { buffer = app.buf, desc = "Delete" })
+
 
 	map("n", "b", function()
 		M.open_all(app)
