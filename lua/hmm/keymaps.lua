@@ -45,7 +45,16 @@ function M.right(app)
 		r.render(app)
 	end
 	if active.nc ~= 0 then
-		app.active = active.c[math.ceil(vim.tbl_count(active.c) / 2)]
+		local dist = 999
+		local index = 1
+		for i, child in ipairs(active.c) do
+			local d = math.abs(child.y - (active.y + active.o))
+			if d < dist then
+				dist = d
+				index = i
+			end
+		end
+		app.active = active.c[index]
 		r.focus_active(app)
 	end
 end

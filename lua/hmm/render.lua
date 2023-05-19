@@ -87,10 +87,9 @@ end
 
 function M.draw_virt(buf, start_row, start_col, end_col, virt_text, highlight)
 	local opts = {
-		end_col = end_col,
-		virt_text_win_col = start_col,
 		virt_text_pos = "overlay",
 		virt_text = { { virt_text, highlight.color } },
+		strict = false,
 	}
 	a.nvim_buf_set_extmark(buf, highlight.space, start_row, start_col, opts)
 end
