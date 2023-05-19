@@ -4,7 +4,7 @@ function M.new_Tree(index, level, text)
 	local w = string.len(text) + 2
 	return {
 		-- our custom metada
-		-- index = index,
+		index = index,
 		level = level,
 		text = text,
 		open = false,
@@ -39,6 +39,24 @@ function M.print_tree(t)
 	print(string.format("cw: %d; ch: %d", t.cw, t.ch))
 	print(string.format("tw: %d; th: %d; o %d", t.tw, t.th, t.o))
 	print(string.format(" x: %d;  y: %d;  w: %d;  h: %d", t.x, t.y, t.w, t.h))
+end
+
+function M.tree_to_lines(tree, level)
+	if level == nil then
+		level = 0
+	end
+	local lines = { string.rep("\t", level) .. tree.text }
+	if vim.tbl_count(tree.c) > 0 then
+		for _, child in ipairs(tree.c) do
+			local clines = M.tree_to_lines(child, level + 1)
+			if clines ~= nil then
+				for _, line in ipairs(clines) do
+					table.insert(lines, line)
+				end
+			end
+		end
+	end
+	return lines
 end
 
 function M.lines_to_htree(lines, app)

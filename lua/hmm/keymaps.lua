@@ -91,6 +91,10 @@ function M.add_sibling(app)
 	r.render(app)
 end
 
+function M.save(app)
+	r.save_to_file(app.tree)
+end
+
 function M.global_keymaps(app)
 	local map = vim.keymap.set
 
@@ -101,7 +105,7 @@ function M.global_keymaps(app)
 
 	-- save to source
 	map("n", "s", function()
-		vim.notify("Saved " .. app.filename)
+		M.save(app)
 	end, { buffer = app.buf, desc = "Save" })
 
 	-- toggle node

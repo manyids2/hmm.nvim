@@ -24,6 +24,20 @@ M.highlights = {
 	spacer = { space = a.nvim_create_namespace("spacer"), color = "Float" },
 }
 
+function M.save_to_file(tree)
+	local lines = t.tree_to_lines(tree, 0)
+	local buf = tree.app.file_buf
+
+	a.nvim_set_current_buf(buf)
+	a.nvim_buf_set_lines(buf, 0, -1, false, lines)
+	a.nvim_exec2('set buftype=""', {})
+	a.nvim_exec2("silent write " .. tree.app.filename, {})
+	vim.notify("Saved " .. tree.app.filename)
+
+	a.nvim_set_current_buf(tree.app.buf)
+	a.nvim_set_current_win(tree.app.win)
+end
+
 function M.clear_win_buf(buf, size, offset)
 	-- clear active, spacers
 	-- TODO: why does it overflow? need margin of 10 here
