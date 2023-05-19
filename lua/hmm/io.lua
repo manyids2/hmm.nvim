@@ -2,18 +2,18 @@ local a = vim.api
 
 local M = {}
 
-function M.new_Tree(index, level, text, app)
+function M.new_Tree(index, level, text, parent, app)
 	local state = M.get_state_from_text(text)
 	return {
 		-- our custom metada
 		app = app,
 		index = index,
 		level = level,
-		text = text,
+		text = state.text,
 		open = state.open,
 		active = state.active,
 		-- base props
-		p = nil, -- parent
+		p = parent, -- parent
 		c = {}, -- children
 		nc = 0, -- number of OPEN children
 		ns = 0, -- number of siblings
@@ -38,27 +38,38 @@ function M.new_Tree(index, level, text, app)
 	}
 end
 
+function M.print_tree(t)
+	for key, value in pairs(t) do
+		if key ~= "c" then
+			print(key, value)
+		end
+	end
+end
+
 function M.get_state_from_text(text)
-	local w = string.len(text)
-	local active = false
+	-- defaults
+	local has = false
 	local open = false
+	local active = false
+	local w = string.len(text)
+	-- basically check last 3 characters
 	if string.sub(text, w - 2, w - 2) == "|" then
-		if string.sub(text, w - 1, w - 1) == "1" then
-			open = true
-		end
-		if string.sub(text, w, w) == "1" then
-			active = true
-		end
+		has = true
+		open = string.sub(text, w - 1, w - 1) == "1"
+		active = string.sub(text, w, w) == "1"
+		-- reset width and text
 		text = string.sub(text, 1, w - 3)
 		w = string.len(text)
 	end
-	return { h = 1, w = w, active = active, open = open }
+	-- NOTE: change to multiline here if needed
+	return { h = 1, w = w, active = active, open = open, has = has, text = text }
 end
 
 function M.get_text_for_state(tree)
-	local oo = tree.open and "1" or "0"
-	local aa = tree.app.active == tree and "1" or "0"
-	return oo .. aa
+	-- 00, 10, 01, 11
+	local open = tree.open and "1" or "0"
+	local active = tree.app.active == tree and "1" or "0"
+	return open .. active
 end
 
 function M.tree_to_lines(tree, level)
@@ -83,22 +94,18 @@ end
 
 function M.lines_to_tree(lines, app)
 	-- initialize root ( will be discarded )
-	local root = { M.new_Tree(0, 0, "root", app) }
+	local root = { M.new_Tree(0, 0, "root", nil, app) }
 
 	-- one node for each line
 	for index, line in ipairs(lines) do
 		line = vim.trim(line)
+		-- only consider non-empty lines
 		if string.len(line) == 0 then
 			-- get indent level
 			local level = vim.tbl_count(vim.split(line, "\t", {}))
 
 			-- set up new node
-			local node = M.new_Tree(index, level, line, app)
-
-			-- open as per config
-			if level <= app.config.initial_depth then
-				node.open = true
-			end
+			local node = M.new_Tree(index, level, line, root[level], app)
 
 			-- mark active
 			if node.active then
@@ -126,7 +133,7 @@ function M.lines_to_tree(lines, app)
 				return
 			end
 
-			local node = M.new_Tree(-1, root[1].level + 1, text)
+			local node = M.new_Tree(1, root[1].level + 1, text, root[1], app)
 			node.open = true
 			table.insert(root[1].c, node)
 
