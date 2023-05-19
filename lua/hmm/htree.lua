@@ -64,8 +64,11 @@ function M.tree_to_lines(tree, level)
 	if tree.open then
 		oo = "1"
 	end
-	if tree.active then
-		aa = "1"
+	-- BUG: Leaf nodes dont have .app set
+	if tree.app ~= nil then
+		if tree.app.active == tree then
+			aa = "1"
+		end
 	end
 	local lines = { string.rep("\t", level) .. tree.text .. "|" .. oo .. aa }
 	if vim.tbl_count(tree.c) > 0 then
@@ -100,7 +103,9 @@ function M.reload(app)
 	local buf = app.file_buf
 	local lines = a.nvim_buf_get_lines(buf, 0, -1, false)
 	app.tree = M.lines_to_htree(lines, app)
-	app.active = app.tree
+	if app.active == nil then
+		app.active = app.tree
+	end
 	a.nvim_set_current_win(app.win)
 	a.nvim_set_current_buf(app.buf)
 end
@@ -138,6 +143,9 @@ function M.lines_to_htree(lines, app)
 		if level <= app.config.initial_depth then
 			node.open = true
 		end
+		if node.active then
+			app.active = node
+		end
 		table.insert(nodes, node)
 		if root[level] ~= nil then
 			table.insert(root[level].c, node)
@@ -163,6 +171,7 @@ function M.lines_to_htree(lines, app)
 		end)
 	end
 	local ptree = root[1].c[1]
+	M.set_props(ptree, 1, nil, app)
 
 	return ptree
 end

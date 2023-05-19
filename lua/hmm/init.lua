@@ -62,10 +62,7 @@ function app.setup(config)
 
 	-- create tree
 	app.set_offset_size(app.win)
-	app.tree = t.lines_to_htree(lines, app)
-
-	-- focus root
-	app.active = app.tree
+	t.reload(app)
 
 	-- set global keymaps
 	k.global_keymaps(app)

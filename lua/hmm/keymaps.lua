@@ -125,6 +125,7 @@ function M.move_sibling(app, up_down)
 end
 
 function M.save(app)
+  r.render(app)
 	t.save_to_file(app)
 end
 
