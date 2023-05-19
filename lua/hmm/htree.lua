@@ -196,9 +196,18 @@ function M.add_sibling(tree, app)
 		end
 		local node = M.new_Tree(-1, tree.level, text)
 		node.app = app
-		table.insert(tree.p.c, node)
 
-		tree.p.nc = vim.tbl_count(tree.p.c)
+		local cc = {}
+		for i = 1, tree.si, 1 do
+			table.insert(cc, tree.p.c[i])
+		end
+		table.insert(cc, node)
+		for i = tree.si + 1, vim.tbl_count(tree.p.c), 1 do
+			table.insert(cc, tree.p.c[i])
+		end
+
+		tree.p.c = cc
+		tree.p.nc = vim.tbl_count(cc)
 		tree.p.open = true
 		app.active = node
 	end)
