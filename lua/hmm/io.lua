@@ -192,4 +192,15 @@ function M.redo(app)
 	M.reload(app)
 end
 
+function M.get_size_center(win)
+	local w = a.nvim_win_get_width(win)
+	local h = a.nvim_win_get_height(win)
+	return {
+    w = w,
+		h = h,
+		x = math.floor(w / 2),
+		y = math.floor(h / 2),
+	}
+end
+
 return M
