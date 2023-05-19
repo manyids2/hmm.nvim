@@ -1,13 +1,27 @@
 local M = {}
 
 function M.new_Tree(index, level, text)
-	local w = string.len(text) + 2
+	local w = string.len(text)
+	local active = false
+	local open = false
+	if string.sub(text, w - 2, w - 2) == "|" then
+		if string.sub(text, w - 1, w - 1) == "1" then
+			open = true
+		end
+		if string.sub(text, w, w) == "1" then
+			active = true
+		end
+		text = string.sub(text, 1, w - 3)
+		w = string.len(text)
+	end
+
 	return {
 		-- our custom metada
 		index = index,
 		level = level,
 		text = text,
-		open = false,
+		open = open,
+		active = active,
 		-- ref to app
 		app = nil,
 		-- base props
@@ -19,14 +33,14 @@ function M.new_Tree(index, level, text)
 		-- node props
 		x = 0,
 		y = 0,
-		w = w,
+		w = w + 2,
 		h = 1,
 		o = 0,
 		-- child props
 		cw = 0,
 		ch = 1,
 		-- tree props
-		tw = w,
+		tw = w + 2,
 		th = 1,
 		ty = 0,
 	}
@@ -45,7 +59,15 @@ function M.tree_to_lines(tree, level)
 	if level == nil then
 		level = 0
 	end
-	local lines = { string.rep("\t", level) .. tree.text }
+	local oo = "0"
+	local aa = "0"
+	if tree.open then
+		oo = "1"
+	end
+	if tree.active then
+		aa = "1"
+	end
+	local lines = { string.rep("\t", level) .. tree.text .. "|" .. oo .. aa }
 	if vim.tbl_count(tree.c) > 0 then
 		for _, child in ipairs(tree.c) do
 			local clines = M.tree_to_lines(child, level + 1)
@@ -230,7 +252,7 @@ function M.add_child(tree, app, from_clipboard)
 	if from_clipboard then
 		local nc = vim.tbl_count(app.clipboard)
 		table.insert(tree.c, app.clipboard[nc])
-    app.active = app.clipboard[nc]
+		app.active = app.clipboard[nc]
 		tree.nc = vim.tbl_count(tree.c)
 		tree.open = true
 	else

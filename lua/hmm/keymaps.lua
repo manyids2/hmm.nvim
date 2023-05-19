@@ -151,6 +151,18 @@ function M.global_keymaps(app)
 		M.save(app)
 	end, { buffer = app.buf, desc = "Save" })
 
+	-- quit
+	map("n", "<esc>", function()
+		M.save(app)
+		vim.cmd([[qa]])
+	end, { buffer = app.buf, desc = "Quit" })
+
+	-- save to source
+	map("n", "q", function()
+		M.save(app)
+		vim.cmd([[qa]])
+	end, { buffer = app.buf, desc = "Quit" })
+
 	-- toggle node
 	map("n", "<space>", function()
 		M.toggle(app)
