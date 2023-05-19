@@ -12,7 +12,7 @@ app.default_config = {
 	margin = 9,
 	align_levels = 0,
 	initial_depth = 1,
-	center_lock = false,
+	center_lock = true,
 	focus_lock = false,
 }
 
@@ -38,17 +38,18 @@ function app.setup(config)
 	app.filename = a.nvim_exec2("echo expand('%')", { output = true }).output
 
 	-- Get the content
-  vim.cmd("e " .. app.filename)
-  app.file_buf = a.nvim_get_current_buf()
+	vim.cmd("e " .. app.filename)
+	app.file_buf = a.nvim_get_current_buf()
 	local lines = a.nvim_buf_get_lines(app.file_buf, 0, -1, false)
 
 	-- get win, buf
 	app.win = a.nvim_get_current_win()
 	app.buf = a.nvim_create_buf(true, true)
 	a.nvim_win_set_buf(app.win, app.buf)
-	app.set_offset_size(app.win)
+  r.hide_cursor()
 
 	-- create tree
+  app.set_offset_size(app.win)
 	app.tree = t.lines_to_htree(lines, app)
 
 	-- focus root

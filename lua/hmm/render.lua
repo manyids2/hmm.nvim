@@ -24,6 +24,20 @@ M.highlights = {
 	spacer = { space = a.nvim_create_namespace("spacer"), color = "Float" },
 }
 
+function M.hide_cursor()
+	local hl = a.nvim_get_hl(0, { name = "Cursor" })
+	hl.blend = 100
+	vim.api.nvim_set_hl(0, "Cursor", hl)
+	vim.opt.guicursor:append("a:Cursor/lCursor")
+end
+
+function M.show_cursor()
+	local hl = a.nvim_get_hl(0, { name = "Cursor" })
+	hl.blend = 0
+	vim.api.nvim_set_hl(0, "Cursor", hl)
+	vim.opt.guicursor:remove("a:Cursor/lCursor")
+end
+
 function M.clear_win_buf(buf, size, offset)
 	-- clear active, spacers
 	-- TODO: why does it overflow? need margin of 10 here

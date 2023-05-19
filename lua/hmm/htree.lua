@@ -115,8 +115,6 @@ function M.lines_to_htree(lines, app)
 	end
 	local ptree = root[1].c[1]
 
-	M.set_props(ptree, 1, nil, app)
-
 	return ptree
 end
 

@@ -1,3 +1,4 @@
+local h = require("hmm.help")
 local t = require("hmm.htree")
 local r = require("hmm.render")
 
@@ -159,6 +160,10 @@ function M.global_keymaps(app)
 	map("n", "b", function()
 		M.open_all(app)
 	end, { buffer = app.buf, desc = "Open all" })
+
+	map("n", "?", function()
+		h.open_help(app)
+	end, { buffer = app.buf, desc = "Open help" })
 
 	map("n", "t", function()
 		vim.cmd([[:messages clear]])
