@@ -4,7 +4,7 @@ function M.new_Tree(index, level, text)
 	local w = string.len(text) + 2
 	return {
 		-- our custom metada
-		index = index,
+		-- index = index,
 		level = level,
 		text = text,
 		open = false,
@@ -38,7 +38,7 @@ function M.print_tree(t)
 	print(string.format("ns: %d; si: %d", t.ns, t.si))
 	print(string.format("cw: %d; ch: %d", t.cw, t.ch))
 	print(string.format("tw: %d; th: %d; o %d", t.tw, t.th, t.o))
-  print(string.format(" x: %d;  y: %d;  w: %d;  h: %d", t.x, t.y, t.w, t.h))
+	print(string.format(" x: %d;  y: %d;  w: %d;  h: %d", t.x, t.y, t.w, t.h))
 end
 
 function M.lines_to_htree(lines, app)
@@ -142,6 +142,49 @@ function M.delete_node(tree, app)
 		tree.p.nc = vim.tbl_count(cc)
 		app.active = tree.p.c[math.max(tree.si - 1, 1)]
 	end
+end
+
+function M.add_child(tree, app)
+	vim.ui.input({}, function(text)
+		if text == nil then
+			return
+		end
+		text = vim.trim(text)
+		if string.len(text) == 0 then
+			return
+		end
+		local node = M.new_Tree(-1, tree.level + 1, text)
+		node.app = app
+		table.insert(tree.c, node)
+
+		tree.nc = vim.tbl_count(tree.c)
+		tree.open = true
+		app.active = node
+	end)
+	M.set_props(app.tree, 1, nil, app)
+end
+
+function M.add_sibling(tree, app)
+	if tree.p == nil then
+		return
+	end
+	vim.ui.input({}, function(text)
+		if text == nil then
+			return
+		end
+		text = vim.trim(text)
+		if string.len(text) == 0 then
+			return
+		end
+		local node = M.new_Tree(-1, tree.level, text)
+		node.app = app
+		table.insert(tree.p.c, node)
+
+		tree.p.nc = vim.tbl_count(tree.p.c)
+		tree.p.open = true
+		app.active = node
+	end)
+	M.set_props(app.tree, 1, nil, app)
 end
 
 return M

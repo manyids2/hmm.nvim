@@ -7,7 +7,7 @@ function M.open_children(tree)
 	if vim.tbl_count(tree.c) == 0 then
 		return
 	end
-  tree.open = true
+	tree.open = true
 	for _, child in ipairs(tree.c) do
 		M.open_children(child)
 	end
@@ -75,8 +75,20 @@ end
 
 function M.delete(app)
 	local active = app.active
-  t.delete_node(active, app)
-  r.render(app)
+	t.delete_node(active, app)
+	r.render(app)
+end
+
+function M.add_child(app)
+	local active = app.active
+	t.add_child(active, app)
+	r.render(app)
+end
+
+function M.add_sibling(app)
+	local active = app.active
+	t.add_sibling(active, app)
+	r.render(app)
 end
 
 function M.global_keymaps(app)
@@ -118,6 +130,13 @@ function M.global_keymaps(app)
 		M.delete(app)
 	end, { buffer = app.buf, desc = "Delete" })
 
+	map("n", "<tab>", function()
+		M.add_child(app)
+	end, { buffer = app.buf, desc = "Add child" })
+
+	map("n", "<enter>", function()
+		M.add_sibling(app)
+	end, { buffer = app.buf, desc = "Add sibling" })
 
 	map("n", "b", function()
 		M.open_all(app)
