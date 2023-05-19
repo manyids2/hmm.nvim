@@ -3,13 +3,28 @@ local r = require("hmm.render")
 
 local M = {}
 
+function M.open_children(tree)
+	if vim.tbl_count(tree.c) == 0 then
+		return
+	end
+  tree.open = true
+	for _, child in ipairs(tree.c) do
+		M.open_children(child)
+	end
+end
+
+function M.open_all(app)
+	M.open_children(app.tree)
+	r.render(app)
+end
+
 function M.toggle(app)
 	if vim.tbl_count(app.active.c) == 0 then
 		app.active = app.active.p
 	end
-  if app.active ~= nil then
-    app.active.open = not app.active.open
-  end
+	if app.active ~= nil then
+		app.active.open = not app.active.open
+	end
 	r.render(app)
 end
 
@@ -92,6 +107,10 @@ function M.global_keymaps(app)
 	map("n", "l", function()
 		M.right(app)
 	end, { buffer = app.buf, desc = "Right" })
+
+	map("n", "b", function()
+		M.open_all(app)
+	end, { buffer = app.buf, desc = "Open all" })
 
 	map("n", "t", function()
 		vim.cmd([[:messages clear]])

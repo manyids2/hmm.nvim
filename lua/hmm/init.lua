@@ -9,7 +9,7 @@ app.default_config = {
 	max_parent_node_width = 25,
 	max_leaf_node_width = 55,
 	line_spacing = 1,
-	margin = 5,
+	margin = 9,
 	align_levels = 0,
 	initial_depth = 1,
 	center_lock = false,
@@ -17,8 +17,8 @@ app.default_config = {
 }
 
 function app.set_offset_size(win)
-	app.offset = { x = 0, y = 0 }
 	app.size = { w = a.nvim_win_get_width(win), h = a.nvim_win_get_height(win) }
+	app.offset = math.floor(app.size.h / 2) - 2
 end
 
 function app.setup(config)
@@ -42,20 +42,10 @@ function app.setup(config)
 	local lines = a.nvim_buf_get_lines(a.nvim_get_current_buf(), 0, -1, false)
 
 	-- get win, buf
-	app.set_offset_size(a.nvim_get_current_win())
-	app.buf = a.nvim_create_buf(false, true)
-	-- local opts = {
-	-- 	relative = "editor",
-	-- 	col = app.offset.x,
-	-- 	row = app.offset.y,
-	-- 	width = app.size.w,
-	-- 	height = app.size.h,
-	-- 	zindex = 20,
-	-- 	style = "minimal",
-	-- }
-	-- app.win = a.nvim_open_win(app.buf, true, opts)
 	app.win = a.nvim_get_current_win()
+	app.buf = a.nvim_create_buf(false, true)
 	a.nvim_win_set_buf(app.win, app.buf)
+	app.set_offset_size(app.win)
 
 	-- create tree
 	app.tree = t.lines_to_htree(lines, app)

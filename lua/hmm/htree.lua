@@ -21,12 +21,14 @@ function M.new_Tree(index, level, text)
 		y = 0,
 		w = w,
 		h = 1,
+		o = 0,
 		-- child props
 		cw = 0,
 		ch = 0,
 		-- tree props
 		tw = w,
 		th = 1,
+		ty = 0,
 	}
 end
 
@@ -71,8 +73,8 @@ end
 
 function M.set_props(tree, si, parent, app)
 	-- parent relevant props
-  tree.app = app
-  local config = app.config
+	tree.app = app
+	local config = app.config
 	if parent ~= nil then
 		tree.p = parent
 		tree.si = si
@@ -81,31 +83,40 @@ function M.set_props(tree, si, parent, app)
 		tree.x = parent.x + parent.w + config.margin
 	end
 	-- only continue if open
-	if tree.open then
-		tree.nc = vim.tbl_count(tree.c)
-	else
+	if not tree.open then
 		tree.nc = 0
-    -- reset
-    tree.ch = 0
-    tree.cw = 0
-    tree.th = 1
-    tree.tw = tree.w
+		-- reset
+		tree.ch = 1
+		tree.cw = 0
+		tree.th = 1 + config.line_spacing
+		tree.tw = tree.w
 		return
 	end
+  tree.nc = vim.tbl_count(tree.c)
 	-- recurse
 	local ch = 0
 	local cw = 0
 	for index, child in ipairs(tree.c) do
 		M.set_props(child, index, tree, app)
-		ch = ch + child.ch + config.line_spacing
+		ch = ch + child.th
 		cw = cw + child.cw + config.margin
 	end
 	-- children relevant props
-	tree.ch = ch - config.line_spacing
+	tree.ch = ch
 	tree.cw = cw
 	-- tree relevant props
 	tree.th = ch
 	tree.tw = tree.cw + config.margin + tree.w
+end
+
+function M.set_y(tree, config)
+	local bottom = tree.y
+	for _, child in ipairs(tree.c) do
+		child.y = bottom
+		M.set_y(child, config)
+		bottom = bottom + child.th
+	end
+	tree.o = math.floor(tree.th / 2) - 1
 end
 
 return M
