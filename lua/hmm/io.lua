@@ -2,7 +2,13 @@ local a = vim.api
 
 local M = {}
 
+M.highlights = {
+	active = { space = a.nvim_create_namespace("active"), color = "IncSearch" },
+	spacer = { space = a.nvim_create_namespace("spacer"), color = "Float" },
+}
+
 function M.new_Tree(index, level, text, parent, app)
+	text = vim.trim(text)
 	local state = M.get_state_from_text(text)
 	return {
 		-- our custom metada
@@ -98,9 +104,8 @@ function M.lines_to_tree(lines, app)
 
 	-- one node for each line
 	for index, line in ipairs(lines) do
-		line = vim.trim(line)
 		-- only consider non-empty lines
-		if string.len(line) == 0 then
+		if string.len(vim.trim(line)) ~= 0 then
 			-- get indent level
 			local level = vim.tbl_count(vim.split(line, "\t", {}))
 
@@ -174,6 +179,11 @@ function M.reload(app)
 	-- make sure we reset current buf and win
 	a.nvim_set_current_win(app.win)
 	a.nvim_set_current_buf(app.buf)
+
+	-- reset the size as well
+	local size = M.get_size_center(app.win)
+	app.size = { w = size.w, h = size.h }
+	app.center = { x = size.x, y = size.y }
 end
 
 function M.undo(app)
@@ -192,15 +202,65 @@ function M.redo(app)
 	M.reload(app)
 end
 
+function M.hide_cursor()
+	local hl = a.nvim_get_hl(0, { name = "Cursor" })
+	hl.blend = 100
+	vim.api.nvim_set_hl(0, "Cursor", hl)
+	vim.opt.guicursor:append("a:Cursor/lCursor")
+end
+
+function M.show_cursor()
+	local hl = a.nvim_get_hl(0, { name = "Cursor" })
+	hl.blend = 0
+	vim.api.nvim_set_hl(0, "Cursor", hl)
+	vim.opt.guicursor:remove("a:Cursor/lCursor")
+end
+
 function M.get_size_center(win)
-	local w = a.nvim_win_get_width(win)
+	local w = a.nvim_win_get_width(win) - 6 -- no idea why
 	local h = a.nvim_win_get_height(win)
 	return {
-    w = w,
+		w = w,
 		h = h,
 		x = math.floor(w / 2),
 		y = math.floor(h / 2),
 	}
+end
+
+function M.clear_win_buf(buf, size)
+	-- clear active, spacers
+	local hi = M.highlights
+	a.nvim_buf_clear_namespace(buf, hi.active.space, 0, -1)
+	a.nvim_buf_clear_namespace(buf, hi.spacer.space, 0, -1)
+	local replacement = { string.rep(" ", size.w) }
+
+	if size.h > 0 then
+		-- delete current
+		for _ = 1, size.h - 1 do
+			a.nvim_buf_set_lines(buf, -2, -1, false, {})
+		end
+	end
+
+	-- clear buffer ( i.e. win )
+	for i = 0, size.h - 2 do
+		a.nvim_buf_set_lines(buf, i, i, true, replacement)
+	end
+	a.nvim_buf_set_lines(buf, -2, -1, true, {})
+end
+
+function M.focus_active(app)
+	local buf = app.buf
+	local win = app.win
+	local active = app.active
+	local hi = M.highlights.active
+	local y = active.y + app.offset.y
+	local x1 = active.x + app.offset.x + 1
+	local x2 = x1 + active.w
+	a.nvim_set_current_buf(buf)
+	a.nvim_set_current_win(win)
+	a.nvim_win_set_cursor(win, { y + 1, x1 })
+	a.nvim_buf_clear_namespace(buf, hi.space, 0, -1)
+	a.nvim_buf_add_highlight(buf, hi.space, hi.color, y, x1, x2)
 end
 
 return M

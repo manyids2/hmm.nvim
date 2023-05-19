@@ -1,6 +1,7 @@
 local a = vim.api
 local io = require("hmm.io")
 local ht = require("hmm.tree")
+local km = require("hmm.keymaps")
 
 local app = {}
 
@@ -33,6 +34,8 @@ function app.init(config)
 	app.win = a.nvim_get_current_win()
 	app.buf = a.nvim_create_buf(true, true)
 	a.nvim_win_set_buf(app.win, app.buf)
+
+	app.offset = { x = 0, y = 0 }
 end
 
 function app.setup(config)
@@ -42,7 +45,17 @@ function app.setup(config)
 		return
 	end
 
+	-- initialize win, buf, filename, etc
 	app.init(config)
+
+	-- read file and parse to tree
+	io.reload(app)
+
+	-- set app keymaps
+	km.global_keymaps(app)
+
+	-- finally, render
+	ht.render(app)
 end
 
 return app
