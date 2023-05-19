@@ -91,6 +91,12 @@ function M.add_sibling(app)
 	r.render(app)
 end
 
+function M.move_sibling(app, up_down)
+	local active = app.active
+	t.move_sibling(active, up_down, app)
+	r.render(app)
+end
+
 function M.save(app)
 	r.save_to_file(app.tree)
 end
@@ -141,6 +147,14 @@ function M.global_keymaps(app)
 	map("n", "<enter>", function()
 		M.add_sibling(app)
 	end, { buffer = app.buf, desc = "Add sibling" })
+
+	map("n", "K", function()
+		M.move_sibling(app, "up")
+	end, { buffer = app.buf, desc = "Move up" })
+
+	map("n", "J", function()
+		M.move_sibling(app, "down")
+	end, { buffer = app.buf, desc = "Move down" })
 
 	map("n", "b", function()
 		M.open_all(app)

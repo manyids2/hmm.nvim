@@ -214,4 +214,47 @@ function M.add_sibling(tree, app)
 	M.set_props(app.tree, 1, nil, app)
 end
 
+function M.move_sibling(tree, up_down, app)
+	if tree.p == nil then
+		return
+	end
+	local nc = vim.tbl_count(tree.p.c)
+	if nc < 2 then
+		return
+	end
+
+	local cc = {}
+	if up_down == "up" then
+		if tree.si == 1 then
+			return
+		end
+		for i = 1, tree.si - 2 do
+			table.insert(cc, tree.p.c[i])
+		end
+		table.insert(cc, tree.p.c[tree.si])
+		table.insert(cc, tree.p.c[tree.si - 1])
+		for i = tree.si + 1, nc, 1 do
+			table.insert(cc, tree.p.c[i])
+		end
+	else
+		if tree.si == nc then
+			return
+		end
+		for i = 1, tree.si - 1 do
+			table.insert(cc, tree.p.c[i])
+		end
+		table.insert(cc, tree.p.c[tree.si + 1])
+		table.insert(cc, tree.p.c[tree.si])
+		for i = tree.si + 2, nc do
+			table.insert(cc, tree.p.c[i])
+		end
+	end
+
+	tree.p.c = cc
+	tree.p.nc = vim.tbl_count(cc)
+	tree.p.open = true
+
+	M.set_props(app.tree, 1, nil, app)
+end
+
 return M
