@@ -51,7 +51,7 @@ function app.setup(config)
 
 	-- Reset size on resize
 	local au_resize = a.nvim_create_augroup("hmm_resize", { clear = true })
-	a.nvim_create_autocmd({ "WinResized", "VimResized" }, {
+	a.nvim_create_autocmd({ "VimResized" }, {
 		group = au_resize,
 		callback = function()
 			local win = a.nvim_get_current_win()
