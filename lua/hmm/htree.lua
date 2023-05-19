@@ -59,6 +59,21 @@ function M.tree_to_lines(tree, level)
 	return lines
 end
 
+function M.save_to_file(app)
+	local a = vim.api
+	local buf = app.file_buf
+	local lines = M.tree_to_lines(app.tree, 0)
+
+	a.nvim_set_current_buf(buf)
+	a.nvim_buf_set_lines(buf, 0, -1, false, lines)
+	a.nvim_exec2('set buftype=""', {})
+	a.nvim_exec2("silent write " .. app.filename, {})
+	vim.notify("Saved " .. app.filename)
+
+	a.nvim_set_current_buf(app.buf)
+	a.nvim_set_current_win(app.win)
+end
+
 function M.lines_to_htree(lines, app)
 	local nlines = vim.tbl_count(lines)
 	if string.len(lines[nlines]) == 0 then
@@ -82,6 +97,22 @@ function M.lines_to_htree(lines, app)
 	end
 
 	-- get the tree
+	if vim.tbl_count(root[1].c) == 0 then
+		vim.ui.input({}, function(text)
+			if text == nil then
+				return
+			end
+			text = vim.trim(text)
+			if string.len(text) == 0 then
+				return
+			end
+			local node = M.new_Tree(-1, root[1].level + 1, text)
+			node.open = true
+			table.insert(root[1].c, node)
+
+			root[1].nc = vim.tbl_count(root[1].c)
+		end)
+	end
 	local ptree = root[1].c[1]
 
 	M.set_props(ptree, 1, nil, app)

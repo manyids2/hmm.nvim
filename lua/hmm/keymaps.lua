@@ -98,7 +98,7 @@ function M.move_sibling(app, up_down)
 end
 
 function M.save(app)
-	r.save_to_file(app.tree)
+	t.save_to_file(app)
 end
 
 function M.global_keymaps(app)
