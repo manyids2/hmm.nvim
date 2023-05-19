@@ -77,8 +77,8 @@ function M.set_props(tree, si, parent, app)
 		tree.p = parent
 		tree.si = si
 		tree.ns = tree.p.nc
-		-- can already set x
-		tree.x = parent.x + config.margin
+		-- can already set x for layered tree
+		tree.x = parent.x + parent.w + config.margin
 	end
 	-- only continue if open
 	if tree.open then

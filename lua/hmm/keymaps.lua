@@ -4,7 +4,12 @@ local r = require("hmm.render")
 local M = {}
 
 function M.toggle(app)
-	app.active.open = not app.active.open
+	if vim.tbl_count(app.active.c) == 0 then
+		app.active = app.active.p
+	end
+  if app.active ~= nil then
+    app.active.open = not app.active.open
+  end
 	r.render(app)
 end
 
@@ -19,14 +24,12 @@ end
 
 function M.right(app)
 	local active = app.active
-	if active.nc == 0 then
-		return
-	end
-	if not active.open then
+	if not active.open and vim.tbl_count(active.c) > 0 then
 		active.open = true
 		r.render(app)
-	else
-		app.active = active.c[math.ceil(active.nc / 2)]
+	end
+	if active.nc ~= 0 then
+		app.active = active.c[math.ceil(vim.tbl_count(active.c) / 2)]
 		r.focus_active(app)
 	end
 end
