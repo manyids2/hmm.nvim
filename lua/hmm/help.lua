@@ -2,8 +2,36 @@ local a = vim.api
 local M = {}
 
 M.lines = {
-	"q, <esc> : quit",
-	".                  .",
+	default = [[
+         s : save
+  <esc>, q : quit
+
+     ↑ , k : up
+     ↓ , j : down
+     ← , h : left
+     → , l : right
+   <space> : toggle children
+
+<enter>, o : new sibling
+  <tab>, O : new child
+         d : delete node and descendents
+
+         J : move node down
+         K : move node up
+
+]],
+	nodes = [[
+         s : save
+  <esc>, q : quit
+<enter>, o : new sibling
+  <tab>, O : new child
+         d : delete node and descendents
+]],
+	marks = [[
+o, <enter> : new sibling
+O,   <tab> : new child
+         d : delete node and descendents
+]],
 }
 
 function M.pad_lines(lines, width, height)
@@ -40,7 +68,8 @@ function M.open_help(app)
 	}
 	local buf = a.nvim_create_buf(false, true)
 	local win = a.nvim_open_win(buf, true, opts)
-	a.nvim_buf_set_lines(buf, 0, -1, false, M.pad_lines(M.lines, opts.width, opts.height))
+	local lines = M.pad_lines(vim.split(M.lines.default, "\n"), opts.width, opts.height)
+	a.nvim_buf_set_lines(buf, 0, -1, false, lines)
 	a.nvim_set_current_win(win)
 
 	-- focus active

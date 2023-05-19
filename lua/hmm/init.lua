@@ -4,6 +4,7 @@ local r = require("hmm.render")
 local k = require("hmm.keymaps")
 
 local app = {}
+app.clipboard = {}
 
 app.default_config = {
 	max_parent_node_width = 25,
@@ -46,10 +47,21 @@ function app.setup(config)
 	app.win = a.nvim_get_current_win()
 	app.buf = a.nvim_create_buf(true, true)
 	a.nvim_win_set_buf(app.win, app.buf)
-  r.hide_cursor()
+	r.hide_cursor()
+
+	-- Reset size on resize
+	local au_resize = a.nvim_create_augroup("hmm_resize", { clear = true })
+	a.nvim_create_autocmd({ "WinResized", "VimResized" }, {
+		group = au_resize,
+		callback = function()
+			local win = a.nvim_get_current_win()
+			app.set_offset_size(win)
+			r.render(app)
+		end,
+	})
 
 	-- create tree
-  app.set_offset_size(app.win)
+	app.set_offset_size(app.win)
 	app.tree = t.lines_to_htree(lines, app)
 
 	-- focus root

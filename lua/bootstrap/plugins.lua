@@ -45,6 +45,7 @@ local plugins = {
 
 	-- usability
 	"MunifTanjim/nui.nvim",
+	"folke/which-key.nvim",
 	{
 		"folke/noice.nvim",
 		event = "VeryLazy",

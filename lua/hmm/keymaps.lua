@@ -74,15 +74,32 @@ function M.down(app)
 	r.focus_active(app)
 end
 
-function M.delete(app)
+function M.copy(app)
 	local active = app.active
-	t.delete_node(active, app)
+	t.copy_node(active, app)
 	r.render(app)
 end
 
-function M.add_child(app)
+function M.delete(app, to_clipboard)
 	local active = app.active
-	t.add_child(active, app)
+	t.delete_node(active, app, to_clipboard)
+	r.render(app)
+end
+
+function M.edit_node(app, blank)
+	local active = app.active
+	if blank then
+		t.edit_node(active, app, { default = "" })
+	else
+		t.edit_node(active, app, { default = active.text })
+	end
+	r.render(app)
+end
+
+function M.add_child(app, from_clipboard)
+	local active = app.active
+	active.open = true
+	t.add_child(active, app, from_clipboard)
 	r.render(app)
 end
 
@@ -100,6 +117,16 @@ end
 
 function M.save(app)
 	t.save_to_file(app)
+end
+
+function M.undo(app)
+	t.undo(app)
+	r.render(app)
+end
+
+function M.redo(app)
+	t.redo(app)
+	r.render(app)
 end
 
 function M.global_keymaps(app)
@@ -121,15 +148,27 @@ function M.global_keymaps(app)
 	end, { buffer = app.buf, desc = "Toggle" })
 
 	-- navigation
-	map("n", "j", function()
-		M.down(app)
-	end, { buffer = app.buf, desc = "Down" })
-
 	map("n", "k", function()
 		M.up(app)
 	end, { buffer = app.buf, desc = "Up" })
 
+	map("n", "<up>", function()
+		M.up(app)
+	end, { buffer = app.buf, desc = "Up" })
+
+	map("n", "j", function()
+		M.down(app)
+	end, { buffer = app.buf, desc = "Down" })
+
+	map("n", "<down>", function()
+		M.down(app)
+	end, { buffer = app.buf, desc = "Down" })
+
 	map("n", "h", function()
+		M.left(app)
+	end, { buffer = app.buf, desc = "Left" })
+
+	map("n", "<left>", function()
 		M.left(app)
 	end, { buffer = app.buf, desc = "Left" })
 
@@ -137,17 +176,71 @@ function M.global_keymaps(app)
 		M.right(app)
 	end, { buffer = app.buf, desc = "Right" })
 
-	map("n", "d", function()
-		M.delete(app)
+	map("n", "<right>", function()
+		M.right(app)
+	end, { buffer = app.buf, desc = "Right" })
+
+	map("n", "<delete>", function()
+		M.delete(app, false)
 	end, { buffer = app.buf, desc = "Delete" })
 
+	map("n", "d", function()
+		M.delete(app, true)
+	end, { buffer = app.buf, desc = "Cut" })
+
+	map("n", "y", function()
+		M.copy(app)
+	end, { buffer = app.buf, desc = "Copy" })
+
 	map("n", "<tab>", function()
-		M.add_child(app)
+		M.add_child(app, false)
+		M.save(app)
 	end, { buffer = app.buf, desc = "Add child" })
+
+	map("n", "p", function()
+		if app.clipboard[vim.tbl_count(app.clipboard)] == app.active then
+			return
+		end
+		M.add_child(app, true)
+		M.save(app)
+		t.reload(app)
+		r.render(app)
+	end, { buffer = app.buf, desc = "Paste as child" })
 
 	map("n", "<enter>", function()
 		M.add_sibling(app)
+		M.save(app)
 	end, { buffer = app.buf, desc = "Add sibling" })
+
+	map("n", "e", function()
+		M.edit_node(app, false)
+		M.save(app)
+	end, { buffer = app.buf, desc = "Edit" })
+
+	map("n", "i", function()
+		M.edit_node(app, false)
+		M.save(app)
+	end, { buffer = app.buf, desc = "Edit" })
+
+	map("n", "a", function()
+		M.edit_node(app, false)
+		M.save(app)
+	end, { buffer = app.buf, desc = "Edit" })
+
+	map("n", "E", function()
+		M.edit_node(app, true)
+		M.save(app)
+	end, { buffer = app.buf, desc = "Edit from blank" })
+
+	map("n", "I", function()
+		M.edit_node(app, true)
+		M.save(app)
+	end, { buffer = app.buf, desc = "Edit from blank" })
+
+	map("n", "A", function()
+		M.edit_node(app, true)
+		M.save(app)
+	end, { buffer = app.buf, desc = "Edit from blank" })
 
 	map("n", "K", function()
 		M.move_sibling(app, "up")
@@ -164,6 +257,14 @@ function M.global_keymaps(app)
 	map("n", "?", function()
 		h.open_help(app)
 	end, { buffer = app.buf, desc = "Open help" })
+
+	map("n", "u", function()
+		M.undo(app)
+	end, { buffer = app.buf, desc = "Undo" })
+
+	map("n", "<c-r>", function()
+		M.redo(app)
+	end, { buffer = app.buf, desc = "Redo" })
 
 	map("n", "t", function()
 		vim.cmd([[:messages clear]])

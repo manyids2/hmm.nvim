@@ -68,10 +68,37 @@ function M.save_to_file(app)
 	a.nvim_buf_set_lines(buf, 0, -1, false, lines)
 	a.nvim_exec2('set buftype=""', {})
 	a.nvim_exec2("silent write " .. app.filename, {})
-	vim.notify("Saved " .. app.filename)
 
 	a.nvim_set_current_buf(app.buf)
 	a.nvim_set_current_win(app.win)
+end
+
+function M.reload(app)
+	local a = vim.api
+	local buf = app.file_buf
+	local lines = a.nvim_buf_get_lines(buf, 0, -1, false)
+	app.tree = M.lines_to_htree(lines, app)
+	app.active = app.tree
+	a.nvim_set_current_win(app.win)
+	a.nvim_set_current_buf(app.buf)
+end
+
+function M.undo(app)
+	local a = vim.api
+	local buf = app.file_buf
+	a.nvim_set_current_buf(buf)
+	a.nvim_exec2("silent undo", {})
+	a.nvim_exec2("silent write " .. app.filename, {})
+	M.reload(app)
+end
+
+function M.redo(app)
+	local a = vim.api
+	local buf = app.file_buf
+	a.nvim_set_current_buf(buf)
+	a.nvim_exec2("silent redo", {})
+	a.nvim_exec2("silent write " .. app.filename, {})
+	M.reload(app)
 end
 
 function M.lines_to_htree(lines, app)
@@ -121,6 +148,7 @@ end
 function M.set_props(tree, si, parent, app)
 	-- parent relevant props
 	tree.app = app
+	tree.w = string.len(tree.text) + 2
 	local config = app.config
 	if parent ~= nil then
 		tree.p = parent
@@ -168,9 +196,16 @@ function M.set_y(tree, config)
 	tree.o = math.floor(tree.th / 2) - 1
 end
 
-function M.delete_node(tree, app)
+function M.copy_node(tree, app)
+	table.insert(app.clipboard, tree)
+end
+
+function M.delete_node(tree, app, cut)
 	if tree.p == nil then
 		return
+	end
+	if cut then
+		table.insert(app.clipboard, tree)
 	end
 	-- if only child
 	if vim.tbl_count(tree.p.c) == 1 then
@@ -191,8 +226,39 @@ function M.delete_node(tree, app)
 	end
 end
 
-function M.add_child(tree, app)
-	vim.ui.input({}, function(text)
+function M.add_child(tree, app, from_clipboard)
+	if from_clipboard then
+		local nc = vim.tbl_count(app.clipboard)
+		table.insert(tree.c, app.clipboard[nc])
+    app.active = app.clipboard[nc]
+		tree.nc = vim.tbl_count(tree.c)
+		tree.open = true
+	else
+		vim.ui.input({}, function(text)
+			if text == nil then
+				return
+			end
+			text = vim.trim(text)
+			if string.len(text) == 0 then
+				return
+			end
+			local node = M.new_Tree(-1, tree.level + 1, text)
+			node.app = app
+			table.insert(tree.c, node)
+
+			tree.nc = vim.tbl_count(tree.c)
+			tree.open = true
+			app.active = node
+		end)
+	end
+	M.set_props(app.tree, 1, nil, app)
+end
+
+function M.edit_node(tree, app, opts)
+	if opts == nil then
+		opts = {}
+	end
+	vim.ui.input(opts, function(text)
 		if text == nil then
 			return
 		end
@@ -200,13 +266,7 @@ function M.add_child(tree, app)
 		if string.len(text) == 0 then
 			return
 		end
-		local node = M.new_Tree(-1, tree.level + 1, text)
-		node.app = app
-		table.insert(tree.c, node)
-
-		tree.nc = vim.tbl_count(tree.c)
-		tree.open = true
-		app.active = node
+		tree.text = text
 	end)
 	M.set_props(app.tree, 1, nil, app)
 end
