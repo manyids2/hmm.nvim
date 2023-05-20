@@ -1,15 +1,9 @@
-local io = require("hmm.io")
 local ht = require("hmm.tree")
 
 local M = {}
 
 function M.global_keymaps(app)
 	local map = vim.keymap.set
-
-	-- focus active
-	map("n", "f", function()
-		io.focus_active(app)
-	end, { desc = "Focus active node" })
 
 	-- pan down
 	map("n", "<c-j>", function()
@@ -34,6 +28,13 @@ function M.global_keymaps(app)
 		app.offset.x = app.offset.x + 5
 		ht.render(app)
 	end, { desc = "Pan right" })
+
+	-- reset
+	map("n", "<c-0>", function()
+		app.offset.x = 0
+		app.offset.y = 0
+		ht.render(app)
+	end, { desc = "Reset root to origin" })
 end
 
 return M

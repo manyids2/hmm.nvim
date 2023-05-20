@@ -14,6 +14,8 @@ app.default_config = {
 	center_lock = true,
 	max_leaf_node_width = 55,
 	max_parent_node_width = 25,
+	list_indent = 4,
+  mode = "tree",
 }
 
 function app.init(config)

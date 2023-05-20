@@ -23,7 +23,7 @@ function M.new_Tree(index, level, text, parent, app)
 		c = {}, -- children
 		nc = 0, -- number of OPEN children
 		ns = 0, -- number of siblings
-		si = 0, -- ith child
+		si = 1, -- ith child
 		-- node props
 		x = 0,
 		y = 0,
@@ -33,7 +33,7 @@ function M.new_Tree(index, level, text, parent, app)
 		cx = state.w + 1,
 		cy = 0,
 		cw = 0,
-		ch = 0,
+		ch = state.h,
 		-- tree props
 		tx = 0,
 		ty = 0,
@@ -158,7 +158,7 @@ end
 
 function M.save_to_file(app)
 	-- convert tree to lines and save
-	local lines = M.tree_to_lines(app.tree, 0)
+	local lines = M.tree_to_lines(app.root, 0)
 	a.nvim_set_current_buf(app.file_buf)
 	a.nvim_buf_set_lines(app.file_buf, 0, -1, false, lines)
 	a.nvim_exec2('set buftype=""', {})
@@ -174,7 +174,7 @@ function M.reload(app)
 	local lines = a.nvim_buf_get_lines(app.file_buf, 0, -1, false)
 
 	-- create tree
-	app.tree = M.lines_to_tree(lines, app)
+	app.root = M.lines_to_tree(lines, app)
 
 	-- make sure we reset current buf and win
 	a.nvim_set_current_win(app.win)
@@ -248,17 +248,7 @@ function M.clear_win_buf(buf, size)
 	a.nvim_buf_set_lines(buf, -2, -1, true, {})
 end
 
-function M.focus_active(app)
-	local buf = app.buf
-	local win = app.win
-	local active = app.active
-	local hi = M.highlights.active
-	local y = active.y + app.offset.y
-	local x1 = active.x + app.offset.x + 1
-	local x2 = x1 + active.w
-
-	local aw = app.size.w
-	local ah = app.size.h
+function M.focus(buf, win, hi, y, x1, x2, ah, aw)
 	local inside = (x1 >= 0) and (x2 < aw) and (y >= 0) and (y < ah)
 	if not inside then
 		return
