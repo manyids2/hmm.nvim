@@ -108,6 +108,7 @@ function M.edit_node(app)
 		io.set_text(app.active, text)
 	end)
 	ht.render(app)
+	io.save_to_file(app)
 end
 
 function M.add_child(app)
@@ -128,6 +129,7 @@ function M.add_child(app)
 		app.active = node
 	end)
 	ht.render(app)
+	io.save_to_file(app)
 end
 
 function M.add_sibling(app)
@@ -160,11 +162,53 @@ function M.add_sibling(app)
 		app.active = node
 	end)
 	ht.render(app)
+	io.save_to_file(app)
+end
+
+function M.delete_node(app)
+	local tree = app.active
+	if tree.p == nil then
+		return
+	end
+	-- if only child
+	if vim.tbl_count(tree.p.c) == 1 then
+		tree.p.c = {}
+		tree.p.nc = 0
+		tree.p.open = false
+		app.active = tree.p
+	else
+		local cc = {}
+		for index, child in ipairs(tree.p.c) do
+			if index ~= tree.si then
+				table.insert(cc, child)
+			end
+		end
+		tree.p.c = cc
+		tree.p.nc = vim.tbl_count(cc)
+		app.active = tree.p.c[math.max(tree.si - 1, 1)]
+	end
+	io.save_to_file(app)
+	ht.render(app)
 end
 
 function M.align_levels(app)
 	app.config.align_levels = not app.config.align_levels
 	ht.render(app)
+end
+
+function M.undo(app)
+	io.undo(app)
+	ht.render(app)
+end
+
+function M.redo(app)
+	io.redo(app)
+	ht.render(app)
+end
+
+function M.quit(app)
+	io.save_to_file(app)
+	vim.cmd([[qa]])
 end
 
 return M

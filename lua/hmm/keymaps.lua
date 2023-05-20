@@ -92,10 +92,30 @@ function M.global_keymaps(app)
 		ax.add_sibling(app)
 	end, { desc = "add sibling" })
 
+	-- delete node
+	map("n", "d", function()
+		ax.delete_node(app)
+	end, { desc = "delete node" })
+
 	-- re render
 	map("n", "<esc>", function()
 		ht.render(app)
 	end, { desc = "refresh" })
+
+	-- undo
+	map("n", "u", function()
+		ax.undo(app)
+	end, { desc = "undo" })
+
+	-- redo
+	map("n", "<c-r>", function()
+		ax.redo(app)
+	end, { desc = "redo" })
+
+	-- quit, save
+	map("n", "q", function()
+    ax.quit(app)
+	end, { desc = "Quit all" })
 end
 
 return M

@@ -5,8 +5,6 @@ local function map(mode, lhs, rhs, opts)
 	vim.keymap.set(mode, lhs, rhs, opts)
 end
 
--- quit, save
-map("n", "q", "<cmd>qa<cr>", { desc = "Quit all" })
 
 -- For comfort options
 map("n", "<leader>l", "<cmd>:Lazy<cr>", { desc = "Lazy" })
