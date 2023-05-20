@@ -19,6 +19,7 @@ function M.focus_active(app)
 	local ah = app.size.h
 
 	io.focus(buf, win, hi, y, x1, x2, ah, aw)
+	io.hide_cursor()
 end
 
 function M.draw_node(buf, tree)
@@ -51,14 +52,26 @@ function M.set_si(tree)
 	end
 end
 
-function M.set_x(tree, config)
+function M.set_cw(tree)
 	local cw = 0
 	for _, child in ipairs(tree.c) do
-		child.x = tree.x + tree.w + config.margin
-		cw = math.max(cw, child.cw)
-		M.set_x(child, config)
+		cw = math.max(cw, child.w)
 	end
 	tree.cw = cw
+	for _, child in ipairs(tree.c) do
+		M.set_cw(child)
+	end
+end
+
+function M.set_x(tree, config)
+	for _, child in ipairs(tree.c) do
+		local pcw = tree.w
+		if config.align_levels and (tree.p ~= nil) then
+			pcw = tree.p.cw
+		end
+		child.x = tree.x + pcw + config.margin
+		M.set_x(child, config)
+	end
 end
 
 function M.set_ch(tree, config)
@@ -98,6 +111,7 @@ end
 
 function M.layout_htree(tree, config)
 	M.set_si(tree)
+  M.set_cw(tree)
 	M.set_x(tree, config)
 	M.set_ch(tree, config)
 	M.set_y(tree, config)

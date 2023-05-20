@@ -72,6 +72,11 @@ function M.global_keymaps(app)
 		ht.render(app)
 	end, { desc = "Reset root to origin" })
 
+	-- align levels
+	map("n", "|", function()
+		ax.align_levels(app)
+	end, { desc = "align levels" })
+
 	-- edit
 	map("n", "e", function()
 		ax.edit_node(app)

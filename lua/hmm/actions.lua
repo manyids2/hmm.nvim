@@ -20,7 +20,7 @@ end
 
 function M.close_all(app)
 	M.toggle_children(app.root, false)
-  app.active = app.root
+	app.active = app.root
 	ht.render(app)
 end
 
@@ -159,6 +159,11 @@ function M.add_sibling(app)
 		tree.p.open = true
 		app.active = node
 	end)
+	ht.render(app)
+end
+
+function M.align_levels(app)
+	app.config.align_levels = not app.config.align_levels
 	ht.render(app)
 end
 
