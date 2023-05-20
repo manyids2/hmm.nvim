@@ -44,6 +44,19 @@ function M.new_Tree(index, level, text, parent, app)
 	}
 end
 
+function M.set_text(tree, text)
+	text = vim.trim(text)
+	local w = string.len(text)
+	local h = 1
+	tree.text = text
+	tree.w = w
+	tree.h = h
+	tree.cx = w + 1
+	tree.ch = h
+	tree.tw = w
+	tree.th = h
+end
+
 function M.print_tree(t)
 	for key, value in pairs(t) do
 		if key ~= "c" then
@@ -148,6 +161,7 @@ function M.lines_to_tree(lines, app)
 
 	-- get reference to correct root of tree
 	local ptree = root[1].c[1]
+	ptree.p = nil
 
 	-- focus root if not state is found
 	if app.active == nil then

@@ -39,44 +39,6 @@ function M.draw_node(buf, tree)
 	end
 end
 
-function M.render_tree(buf, tree, config)
-	M.draw_node(buf, tree)
-  sp.draw_spacer(buf, tree, config)
-	if not tree.open then
-		return
-	end
-
-	if vim.tbl_count(tree.c) > 0 then
-		for _, child in ipairs(tree.c) do
-			M.render_tree(buf, child, config)
-		end
-	end
-end
-
-function M.render(app)
-	-- reset size
-	local size = io.get_size_center(app.win)
-	app.size = { w = size.w, h = size.h }
-	app.center = { x = size.x, y = size.y }
-
-	-- recompute layout
-	-- M.position_root(app)
-	if app.config.mode == "list" then
-		M.layout_list(app.root, app.config)
-	else
-		M.layout_htree(app.root, app.config)
-	end
-
-	-- reset buffer
-	io.clear_win_buf(app.buf, app.size)
-
-	-- render to buffer
-	M.render_tree(app.buf, app.root, app.config)
-
-	-- set focus
-	M.focus_active(app)
-end
-
 function M.position_root(app)
 	app.offset.x = 10
 	app.offset.y = 10
@@ -102,6 +64,10 @@ end
 function M.set_ch(tree, config)
 	for _, child in ipairs(tree.c) do
 		M.set_ch(child, config)
+	end
+	if not tree.open then
+		tree.ch = tree.h + config.line_spacing
+		return
 	end
 	local ch = 0
 	if vim.tbl_count(tree.c) == 0 then
@@ -144,6 +110,44 @@ function M.layout_list(tree, config)
 	for _, child in ipairs(tree.c) do
 		M.layout_list(child, config)
 	end
+end
+
+function M.render_tree(buf, tree, config)
+	M.draw_node(buf, tree)
+	sp.draw_spacer(buf, tree, config)
+	if not tree.open then
+		return
+	end
+
+	if vim.tbl_count(tree.c) > 0 then
+		for _, child in ipairs(tree.c) do
+			M.render_tree(buf, child, config)
+		end
+	end
+end
+
+function M.render(app)
+	-- reset size
+	local size = io.get_size_center(app.win)
+	app.size = { w = size.w, h = size.h }
+	app.center = { x = size.x, y = size.y }
+
+	-- recompute layout
+	-- M.position_root(app)
+	if app.config.mode == "list" then
+		M.layout_list(app.root, app.config)
+	else
+		M.layout_htree(app.root, app.config)
+	end
+
+	-- reset buffer
+	io.clear_win_buf(app.buf, app.size)
+
+	-- render to buffer
+	M.render_tree(app.buf, app.root, app.config)
+
+	-- set focus
+	M.focus_active(app)
 end
 
 return M
