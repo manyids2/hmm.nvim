@@ -1,5 +1,6 @@
 local a = vim.api
 local io = require("hmm.io")
+local sp = require("hmm.spacers")
 
 local M = {}
 
@@ -38,16 +39,16 @@ function M.draw_node(buf, tree)
 	end
 end
 
-function M.render_tree(buf, tree)
+function M.render_tree(buf, tree, config)
 	M.draw_node(buf, tree)
+  sp.draw_spacer(buf, tree, config)
 	if not tree.open then
 		return
 	end
 
 	if vim.tbl_count(tree.c) > 0 then
-		-- M.draw_spacer(tree)
 		for _, child in ipairs(tree.c) do
-			M.render_tree(buf, child)
+			M.render_tree(buf, child, config)
 		end
 	end
 end
@@ -70,7 +71,7 @@ function M.render(app)
 	io.clear_win_buf(app.buf, app.size)
 
 	-- render to buffer
-	M.render_tree(app.buf, app.root)
+	M.render_tree(app.buf, app.root, app.config)
 
 	-- set focus
 	M.focus_active(app)
@@ -117,8 +118,8 @@ function M.set_y(tree, config)
 	local y = tree.y
 	for _, child in ipairs(tree.c) do
 		child.y = y
-		y = y + child.ch
 		M.set_y(child, config)
+		y = y + child.ch
 	end
 end
 

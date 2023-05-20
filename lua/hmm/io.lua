@@ -4,7 +4,7 @@ local M = {}
 
 M.highlights = {
 	active = { space = a.nvim_create_namespace("active"), color = "IncSearch" },
-	spacer = { space = a.nvim_create_namespace("spacer"), color = "Float" },
+	spacer = { space = a.nvim_create_namespace("spacer"), color = "Whitespace" },
 }
 
 function M.new_Tree(index, level, text, parent, app)
