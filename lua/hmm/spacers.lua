@@ -27,6 +27,8 @@ function M.draw_virt(buf, start_row, start_col, virt_text)
 end
 
 function M.draw_spacer(buf, tree, config)
+	-- TODO: There is a more intelligent way to do this
+	-- treat the spacer as a rectangle and draw only visible
 	local nc = vim.tbl_count(tree.c)
 	if nc == 0 then
 		return
@@ -45,29 +47,52 @@ function M.draw_spacer(buf, tree, config)
 	-- check bounds
 	local aw = tree.app.size.w
 	local ah = tree.app.size.h
-	local inside = (x1 >= 0) and (x2 < aw) and (y1 > 0) and (y2 < ah - 1)
 
 	-- set the text
-	if inside then
-		local y = tree.y + tree.toy + ofy
-		if not tree.open then
+	local inside
+	local y = tree.y + tree.toy + ofy
+	if not tree.open then
+		-- has children
+		inside = (x1 >= 0) and (x1 < aw) and (y > 0) and (y < ah - 1)
+		if inside then
 			M.draw_virt(buf, y, x1, M.symbols.hc)
-		else
+		end
+	else
+		-- spacer from parent to children
+		inside = (x1 >= 0) and (x1 + config.margin - 5 < aw) and (y > 0) and (y < ah - 1)
+		if inside then
 			M.draw_virt(buf, y, x1, string.rep(M.symbols.bh, config.margin - 5))
+		end
 
-			for _, child in ipairs(tree.c) do
-				local yc = child.y + child.toy + ofy
+		-- vertical line
+		for _, child in ipairs(tree.c) do
+			local yc = child.y + child.toy + ofy
+			inside = (x2 - 4 >= 0) and (x2 - 4 < aw) and (yc > 0) and (yc < ah - 1)
+			if inside then
 				M.draw_virt(buf, yc, x2 - 4, string.rep(M.symbols.bh, 2))
 			end
-			if nc > 1 then
-				-- top and bottom
+		end
+		if nc > 1 then
+			-- top and bottom
+			inside = (x2 - 5 >= 0) and (x2 - 5 < aw) and (y1 > 0) and (y1 < ah - 1)
+			if inside then
 				M.draw_virt(buf, y1, x2 - 5, M.symbols.bt)
+			end
+
+			inside = (x2 - 5 >= 0) and (x2 - 5 < aw) and (y2 > 0) and (y2 < ah - 1)
+			if inside then
 				M.draw_virt(buf, y2, x2 - 5, M.symbols.bb)
-				-- vertical
-				for i = y1 + 1, y2 - 1 do
+			end
+			-- vertical
+			for i = y1 + 1, y2 - 1 do
+				inside = (x2 - 5 >= 0) and (x2 - 5 < aw) and (i > 0) and (i < ah - 1)
+				if inside then
 					M.draw_virt(buf, i, x2 - 5, M.symbols.bv)
 				end
-			else
+			end
+		else
+			inside = (x2 - 5 >= 0) and (x2 - 5 < aw) and (y1 > 0) and (y1 < ah - 1)
+			if inside then
 				M.draw_virt(buf, y1, x2 - 5, M.symbols.bh)
 			end
 		end

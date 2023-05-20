@@ -263,7 +263,7 @@ function M.clear_win_buf(buf, size)
 end
 
 function M.focus(buf, win, hi, y, x1, x2, ah, aw)
-	local inside = (x1 >= 0) and (x2 < aw) and (y >= 0) and (y < ah)
+	local inside = (x1 >= 0) and (x2 < aw) and (y > 0) and (y < ah - 1)
 	if not inside then
 		return
 	end

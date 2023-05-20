@@ -20,12 +20,14 @@ end
 
 function M.close_all(app)
 	M.toggle_children(app.root, false)
+  app.active = app.root
 	ht.render(app)
 end
 
 function M.toggle(app)
 	if vim.tbl_count(app.active.c) == 0 then
-		app.active = app.active.p
+		-- app.active = app.active.p -- a bit unexpected and annoying
+		return
 	end
 	if app.active ~= nil then
 		app.active.open = not app.active.open
