@@ -49,7 +49,7 @@ vim.g.markdown_recommended_style = 0
 opt.cmdheight = 0
 opt.laststatus = 0
 
-opt.number = true -- Print line number
+opt.number = false -- Print line number
 opt.relativenumber = false -- Relative line numbers
 
 opt.scrolloff = 0 -- Lines of context

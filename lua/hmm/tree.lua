@@ -18,6 +18,7 @@ function M.focus_active(app)
 	local aw = app.size.w
 	local ah = app.size.h
 
+	a.nvim_win_set_cursor(win, { 1, 0 })
 	io.focus(buf, win, hi, y, x1, x2, ah, aw)
 	io.hide_cursor()
 end
@@ -111,7 +112,7 @@ end
 
 function M.layout_htree(tree, config)
 	M.set_si(tree)
-  M.set_cw(tree)
+	M.set_cw(tree)
 	M.set_x(tree, config)
 	M.set_ch(tree, config)
 	M.set_y(tree, config)

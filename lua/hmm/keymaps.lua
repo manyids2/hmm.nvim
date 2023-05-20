@@ -91,6 +91,11 @@ function M.global_keymaps(app)
 	map("n", "<enter>", function()
 		ax.add_sibling(app)
 	end, { desc = "add sibling" })
+
+	-- re render
+	map("n", "<esc>", function()
+		ht.render(app)
+	end, { desc = "refresh" })
 end
 
 return M
