@@ -256,6 +256,13 @@ function M.focus_active(app)
 	local y = active.y + app.offset.y
 	local x1 = active.x + app.offset.x + 1
 	local x2 = x1 + active.w
+
+	local aw = app.size.w
+	local ah = app.size.h
+	local inside = (x1 >= 0) and (x2 < aw) and (y >= 0) and (y < ah)
+	if not inside then
+		return
+	end
 	a.nvim_set_current_buf(buf)
 	a.nvim_set_current_win(win)
 	a.nvim_win_set_cursor(win, { y + 1, x1 })
