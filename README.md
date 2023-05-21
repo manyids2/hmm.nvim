@@ -3,9 +3,9 @@
 [h-m-m](https://github.com/nadrad/h-m-m) for [neovim](https://neovim.io/),
 with an infinite pannable canvas, colorschemes, file explorer etc.
 
-Tested for use as standalone app, powered by `NVIM_APPNAME` from neovim.
+Intended for use as standalone app, powered by `NVIM_APPNAME` from neovim.
 In other words, this requires no knowledge of vim, and does not mess with your current vim config.
-It is intended as plug and play replacement for h-m-m.
+It is intended as plug and play replacement for h-m-m, when it is ready.
 
 Automatically installs needed dependencies ( i.e. plugins ) using [lazy.nvim](https://github.com/folke/lazy.nvim).
 
