@@ -1,3 +1,3 @@
 require("bootstrap")
 vim.cmd([[set background=dark]])
-vim.cmd([[colorscheme habamax]])
+vim.cmd([[colorscheme moonfly]])
