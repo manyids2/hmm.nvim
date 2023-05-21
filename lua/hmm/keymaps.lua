@@ -92,10 +92,32 @@ function M.global_keymaps(app)
 		ax.add_sibling(app)
 	end, { desc = "add sibling" })
 
-	-- delete node
+	-- -- copy node -- need to make deep copy
+  -- -- or check if was copied, then write
+  -- -- to file and reload
+	-- map("n", "y", function()
+	-- 	ax.copy_node(app)
+	-- end, { desc = "copy node" })
+
+	-- cut node
 	map("n", "d", function()
-		ax.delete_node(app)
+		ax.delete_node(app, true)
+	end, { desc = "cut node" })
+
+	-- delete node
+	map("n", "<delete>", function()
+		ax.delete_node(app, false)
 	end, { desc = "delete node" })
+
+	-- paste node
+	map("n", "p", function()
+		ax.paste_node_as_child(app)
+	end, { desc = "paste child" })
+
+	-- paste node
+	map("n", "P", function()
+		ax.paste_node_as_sibling(app)
+	end, { desc = "paste sibling" })
 
 	-- re render
 	map("n", "<esc>", function()
@@ -114,7 +136,7 @@ function M.global_keymaps(app)
 
 	-- quit, save
 	map("n", "q", function()
-    ax.quit(app)
+		ax.quit(app)
 	end, { desc = "Quit all" })
 end
 

@@ -11,11 +11,12 @@ app.default_config = {
 	initial_depth = 1,
 	focus_lock = false,
 	center_lock = true,
-  align_levels = false,
+	align_levels = false,
 	max_leaf_node_width = 55,
 	max_parent_node_width = 25,
 	list_indent = 4,
-  mode = "tree",
+	mode = "tree",
+	clipboard = {},
 }
 
 function app.init(config)

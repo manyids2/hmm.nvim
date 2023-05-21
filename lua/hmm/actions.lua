@@ -111,64 +111,125 @@ function M.edit_node(app)
 	io.save_to_file(app)
 end
 
-function M.add_child(app)
-	local tree = app.active
-	vim.ui.input({}, function(text)
-		if text == nil then
-			return
-		end
-		text = vim.trim(text)
-		if string.len(text) == 0 then
-			return
-		end
-		local node = io.new_Tree(-1, tree.level + 1, text, tree, app)
-		table.insert(tree.c, node)
+function M.add_child(app, tree)
+	local p = app.active
+	if tree == nil then
+		vim.ui.input({}, function(text)
+			if text == nil then
+				return
+			end
+			text = vim.trim(text)
+			if string.len(text) == 0 then
+				return
+			end
 
-		tree.nc = vim.tbl_count(tree.c)
-		tree.open = true
-		app.active = node
-	end)
+			local node = io.new_Tree(-1, p.level + 1, text, p, app)
+			table.insert(p.c, node)
+			p.nc = vim.tbl_count(p.c)
+			p.open = true
+			app.active = node
+		end)
+	else
+		p = app.active
+		tree.p = p
+		table.insert(p.c, tree)
+		p.nc = vim.tbl_count(p.c)
+		p.open = true
+		app.active = tree
+	end
 	ht.render(app)
 	io.save_to_file(app)
 end
 
-function M.add_sibling(app)
+function M.add_sibling(app, tree)
+	local sib = app.active
+	if sib.p == nil then
+		return
+	end
+	if tree == nil then
+		vim.ui.input({}, function(text)
+			if text == nil then
+				return
+			end
+			text = vim.trim(text)
+			if string.len(text) == 0 then
+				return
+			end
+			local node = io.new_Tree(-1, sib.level, text, sib.p, app)
+
+			local cc = {}
+			for i = 1, sib.si, 1 do
+				table.insert(cc, sib.p.c[i])
+			end
+			table.insert(cc, node)
+			for i = sib.si + 1, vim.tbl_count(sib.p.c), 1 do
+				table.insert(cc, sib.p.c[i])
+			end
+
+			sib.p.c = cc
+			sib.p.nc = vim.tbl_count(cc)
+			sib.p.open = true
+			app.active = node
+		end)
+	else
+		local cc = {}
+		for i = 1, sib.si, 1 do
+			table.insert(cc, sib.p.c[i])
+		end
+		table.insert(cc, tree)
+		for i = sib.si + 1, vim.tbl_count(sib.p.c), 1 do
+			table.insert(cc, sib.p.c[i])
+		end
+
+    tree.p = sib.p
+		sib.p.c = cc
+		sib.p.nc = vim.tbl_count(cc)
+		sib.p.open = true
+		app.active = tree
+	end
+	ht.render(app)
+	io.save_to_file(app)
+end
+
+function M.copy_node(app)
+	local tree = app.active
+	app.config.clipboard = {}
+	table.insert(app.config.clipboard, tree)
+end
+
+function M.paste_node_as_child(app)
+	local nc = vim.tbl_count(app.config.clipboard)
+	if nc == 0 then
+		return
+	end
+	-- for now, only one assumed
+	local tree = app.config.clipboard[1]
+	-- avoid recursion ( shallow check )
+	if tree == app.active then
+		return
+	end
+	M.add_child(app, tree)
+end
+
+function M.paste_node_as_sibling(app)
+	local nc = vim.tbl_count(app.config.clipboard)
+	if nc == 0 then
+		return
+	end
+	-- for now, only one assumed
+	local tree = app.config.clipboard[1]
+	-- avoid recursion ( shallow check )
+	M.add_sibling(app, tree)
+end
+
+function M.delete_node(app, cut)
 	local tree = app.active
 	if tree.p == nil then
 		return
 	end
-	vim.ui.input({}, function(text)
-		if text == nil then
-			return
-		end
-		text = vim.trim(text)
-		if string.len(text) == 0 then
-			return
-		end
-		local node = io.new_Tree(-1, tree.level, text, tree.p, app)
-
-		local cc = {}
-		for i = 1, tree.si, 1 do
-			table.insert(cc, tree.p.c[i])
-		end
-		table.insert(cc, node)
-		for i = tree.si + 1, vim.tbl_count(tree.p.c), 1 do
-			table.insert(cc, tree.p.c[i])
-		end
-
-		tree.p.c = cc
-		tree.p.nc = vim.tbl_count(cc)
-		tree.p.open = true
-		app.active = node
-	end)
-	ht.render(app)
-	io.save_to_file(app)
-end
-
-function M.delete_node(app)
-	local tree = app.active
-	if tree.p == nil then
-		return
+	-- cut
+	if cut then
+		M.copy_node(app)
 	end
 	-- if only child
 	if vim.tbl_count(tree.p.c) == 1 then
