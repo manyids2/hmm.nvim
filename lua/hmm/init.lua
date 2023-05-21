@@ -20,6 +20,8 @@ M.default_config = {
 	mode = "tree",
 	help = "general",
 	clipboard = {},
+	colorscheme = "forestbones",
+	background = "dark",
 }
 
 function M.init(config)
@@ -69,6 +71,8 @@ function M.setup(config)
 
 	-- initialize win, buf, filename, etc
 	local app = M.init(config)
+	vim.cmd("colorscheme " .. app.config.colorscheme)
+	vim.cmd("set background=" .. app.config.background)
 
 	-- read file and parse to tree
 	io.reload(app)

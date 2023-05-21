@@ -1,6 +1,4 @@
 require("bootstrap")
-vim.cmd([[set background=dark]])
-vim.cmd([[colorscheme forestbones]])
 
 local a = vim.api
 local hmm_open = a.nvim_create_augroup("hmm_open", { clear = true })
