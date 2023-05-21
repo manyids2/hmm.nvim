@@ -18,7 +18,6 @@ M.default_config = {
 	x_speed = 5,
 	y_speed = 2,
 	mode = "tree",
-	help = "general",
 	clipboard = {},
 	colorscheme = "carbonfox",
 	background = "dark",

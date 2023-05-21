@@ -16,6 +16,7 @@ function M.buffer_keymaps(app)
 	-- quit, help, export
 	M.map("n", "q", ax.quit, "quit", app)
 	M.map("n", "?", hh.open_help, "help", app)
+	M.map("n", "z", hh.open_config, "config", app)
 	M.map("n", "<C-x>", he.open_export, "export", app)
 
 	-- toggle

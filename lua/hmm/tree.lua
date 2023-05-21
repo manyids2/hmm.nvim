@@ -176,8 +176,8 @@ end
 
 function M.render(app)
   -- reset colors
-	vim.cmd("colorscheme " .. app.config.colorscheme)
-	vim.cmd("set background=" .. app.config.background)
+	-- vim.cmd("colorscheme " .. app.config.colorscheme)
+	-- vim.cmd("set background=" .. app.config.background)
 
   -- reset size
   local size = io.get_size_center(app.win)

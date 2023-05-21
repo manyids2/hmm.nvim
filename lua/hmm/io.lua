@@ -302,7 +302,7 @@ end
 
 function M.show_help(win, buf)
 	local hi = M.highlights.tip
-	local text = "   press ? for help "
+	local text = "   press ? for help, z for config "
 	local width = a.nvim_win_get_width(win)
 	local row = 0
 	local col = width - string.len(text)
