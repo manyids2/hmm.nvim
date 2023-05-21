@@ -83,6 +83,19 @@ local plugins = {
 	"folke/tokyonight.nvim",
 	"aktersnurra/no-clown-fiesta.nvim",
 	"mcchrish/zenbones.nvim",
+	"nvim-tree/nvim-web-devicons",
+
+	-- neotree, bufferline?
+	"nvim-neo-tree/neo-tree.nvim",
+	{
+		"akinsho/bufferline.nvim",
+		opts = {
+			options = {
+				buffer_close_icon = "",
+				separator_style = "slant",
+			},
+		},
+	},
 
 	-- The juice
 	{ dir = "/home/x/fd/code/nvim-stuff/hmm.nvim" },

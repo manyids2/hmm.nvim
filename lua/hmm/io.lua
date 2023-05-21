@@ -267,8 +267,6 @@ function M.focus(buf, win, hi, y, x1, x2, ah, aw)
 	if not inside then
 		return
 	end
-	a.nvim_set_current_buf(buf)
-	a.nvim_set_current_win(win)
 	a.nvim_win_set_cursor(win, { y + 1, x1 })
 	a.nvim_buf_clear_namespace(buf, hi.space, 0, -1)
 	a.nvim_buf_add_highlight(buf, hi.space, hi.color, y, x1, x2)

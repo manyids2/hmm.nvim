@@ -3,157 +3,59 @@ local ax = require("hmm.actions")
 
 local M = {}
 
-function M.global_keymaps(app)
+function M.map(mode, lhs, rhs, desc, app)
+	vim.keymap.set(mode, lhs, function()
+		rhs(app)
+	end, { desc = desc, buffer = app.buf })
+end
+
+function M.buffer_keymaps(app)
 	local map = vim.keymap.set
 
+	-- quit
+	M.map("n", "q", ax.quit, "quit", app)
+
 	-- toggle
-	map("n", "<space>", function()
-		ax.toggle(app)
-	end, { desc = "toggle" })
+	M.map("n", "<space>", ax.toggle, "toggle", app)
+	M.map("n", "b", ax.open_all, "open all", app)
+	M.map("n", "B", ax.close_all, "close all", app)
 
-	-- open all
-	map("n", "b", function()
-		ax.open_all(app)
-	end, { desc = "open all" })
+	-- navigation
+	M.map("n", "k", ax.up, "up", app)
+	M.map("n", "j", ax.down, "down", app)
+	M.map("n", "h", ax.left, "left", app)
+	M.map("n", "l", ax.right, "right", app)
 
-	-- close all
-	map("n", "B", function()
-		ax.close_all(app)
-	end, { desc = "close all" })
+	-- pan
+	M.map("n", "<M-k>", ax.pan_up, "pan up", app)
+	M.map("n", "<M-j>", ax.pan_down, "pan down", app)
+	M.map("n", "<M-h>", ax.pan_left, "pan left", app)
+	M.map("n", "<M-l>", ax.pan_right, "pan right", app)
+	M.map("n", "<c-0>", ax.pan_reset, "pan reset", app)
+	M.map("n", "m", ax.focus_root, "focus root", app)
+	M.map("n", "c", ax.focus_active, "focus active", app)
+	M.map("n", "C", ax.focus_lock, "focus lock", app)
 
-	-- down
-	map("n", "j", function()
-		ax.down(app)
-	end, { desc = "down" })
-
-	-- up
-	map("n", "k", function()
-		ax.up(app)
-	end, { desc = "up" })
-
-	-- left
-	map("n", "h", function()
-		ax.left(app)
-	end, { desc = "left" })
-
-	-- right
-	map("n", "l", function()
-		ax.right(app)
-	end, { desc = "right" })
-
-	-- pan down
-	map("n", "<c-j>", function()
-		app.offset.y = app.offset.y + app.config.y_speed
-		ht.render(app)
-	end, { desc = "Pan down" })
-
-	-- pan up
-	map("n", "<c-k>", function()
-		app.offset.y = app.offset.y - app.config.y_speed
-		ht.render(app)
-	end, { desc = "Pan up" })
-
-	-- pan left
-	map("n", "<c-h>", function()
-		app.offset.x = app.offset.x - app.config.x_speed
-		ht.render(app)
-	end, { desc = "Pan left" })
-
-	-- pan right
-	map("n", "<c-l>", function()
-		app.offset.x = app.offset.x + app.config.x_speed
-		ht.render(app)
-	end, { desc = "Pan right" })
-
-	-- reset
-	map("n", "<c-0>", function()
-		app.offset.x = 0
-		app.offset.y = 0
-		ht.render(app)
-	end, { desc = "Reset root to origin" })
-
-	-- align levels
-	map("n", "|", function()
-		ax.align_levels(app)
-	end, { desc = "align levels" })
-
-	-- align levels
-	map("n", "C", function()
-		ax.focus_lock(app)
-	end, { desc = "focus lock" })
-
-	-- edit
-	map("n", "e", function()
-		ax.edit_node(app)
-	end, { desc = "edit" })
-
-	-- add child
-	map("n", "<tab>", function()
-		ax.add_child(app)
-	end, { desc = "add child" })
-
-	-- add sibling
-	map("n", "<enter>", function()
-		ax.add_sibling(app)
-	end, { desc = "add sibling" })
-
+	-- edit, add, copy, paste
+	M.map("n", "e", ax.edit_node, "edit node", app)
+	M.map("n", "<tab>", ax.add_child, "add child", app)
+	M.map("n", "<enter>", ax.add_sibling, "add sibling", app)
 	-- copy node -- need to make deep copy
 	-- or check if was copied, then write
-	-- to file and reload
-	map("n", "y", function()
-		ax.copy_node(app)
-	end, { desc = "copy node" })
+	-- to file and reload, so expensive for now
+	M.map("n", "y", ax.copy_node, "copy node", app)
+	M.map("n", "d", ax.cut_node, "cut node", app)
+	M.map("n", "<delete>", ax.delete_node, "delete node", app)
+	M.map("n", "p", ax.paste_node_as_child, "paste node as child", app)
+	M.map("n", "P", ax.paste_node_as_sibling, "paste node as sibling", app)
 
-	-- cut node
-	map("n", "d", function()
-		ax.delete_node(app, true)
-	end, { desc = "cut node" })
+	-- manual refreshes
+	M.map("n", "<esc>", ht.render, "render", app)
+	M.map("n", "<c-s>", ax.reset, "reset", app)
 
-	-- delete node
-	map("n", "<delete>", function()
-		ax.delete_node(app, false)
-	end, { desc = "delete node" })
-
-	-- paste child
-	map("n", "p", function()
-		ax.paste_node_as_child(app)
-	end, { desc = "paste child" })
-
-	-- paste sibling
-	map("n", "P", function()
-		ax.paste_node_as_sibling(app)
-	end, { desc = "paste sibling" })
-
-	-- re render
-	map("n", "<esc>", function()
-		ht.render(app)
-	end, { desc = "refresh" })
-
-	-- reload
-	map("n", "<c-s>", function()
-		ax.reset(app)
-	end, { desc = "reset ( read again and render )" })
-
-	-- undo
-	map("n", "u", function()
-		ax.undo(app)
-	end, { desc = "undo" })
-
-	-- redo
-	map("n", "<c-r>", function()
-		ax.redo(app)
-	end, { desc = "redo" })
-
-	-- quit, save
-	map("n", "q", function()
-		ax.quit(app)
-	end, { desc = "Quit all" })
-
-	-- snap to active
-	map("n", "c", function()
-		ht.set_offset_to_active(app)
-		ht.render(app)
-	end, { desc = "Snap to active" })
+	-- undo, redo
+	M.map("n", "u", ax.undo, "undo", app)
+	M.map("n", "<c-r>", ax.redo, "redo", app)
 
 	-- debug
 	map("n", "t", function()

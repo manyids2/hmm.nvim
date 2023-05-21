@@ -4,7 +4,7 @@ local ht = require("hmm.tree")
 local M = {}
 
 function M.reset(app)
-  io.save_to_file(app)
+	io.save_to_file(app)
 	io.reload(app)
 	ht.render(app)
 end
@@ -19,15 +19,23 @@ function M.toggle_children(tree, open)
 	end
 end
 
+function M.focus_root(app)
+	app.active = app.root
+	ht.render(app)
+	M.pan_reset(app)
+end
+
 function M.open_all(app)
 	M.toggle_children(app.root, true)
 	ht.render(app)
+	M.pan_reset(app)
 end
 
 function M.close_all(app)
 	M.toggle_children(app.root, false)
 	app.active = app.root
 	ht.render(app)
+	M.focus_active(app)
 end
 
 function M.toggle(app)
@@ -39,10 +47,37 @@ function M.toggle(app)
 		app.active.open = not app.active.open
 	end
 	ht.render(app)
-	-- need to re-render as we compute positions after open
+end
+
+function M.up(app)
+	-- go to parent
+	local active = app.active
+	if active.p == nil then
+		return
+	end
+	if active.si == 1 then
+		return
+	end
+	app.active = active.p.c[math.max(1, active.si - 1)]
+	ht.focus_active(app)
 	if app.config.focus_lock then
-		ht.set_offset_to_active(app)
-		ht.render(app)
+		M.focus_active(app)
+	end
+end
+
+function M.down(app)
+	local active = app.active
+	if active.p == nil then
+		return
+	end
+	local nc = vim.tbl_count(active.p.c)
+	if active.si == nc then
+		return
+	end
+	app.active = active.p.c[math.min(nc, active.si + 1)]
+	ht.focus_active(app)
+	if app.config.focus_lock then
+		M.focus_active(app)
 	end
 end
 
@@ -52,11 +87,10 @@ function M.left(app)
 		return
 	end
 	app.active = active.p
-	if app.config.focus_lock then
-		ht.set_offset_to_active(app)
-		ht.render(app)
-	end
 	ht.focus_active(app)
+	if app.config.focus_lock then
+		M.focus_active(app)
+	end
 end
 
 function M.right(app)
@@ -81,46 +115,39 @@ function M.right(app)
 			end
 		end
 		app.active = active.c[index]
-		if app.config.focus_lock then
-			ht.set_offset_to_active(app)
-			ht.render(app)
-		end
 		ht.focus_active(app)
 	end
+	if app.config.focus_lock then
+		M.focus_active(app)
+	end
 end
 
-function M.up(app)
-	-- go to parent
-	local active = app.active
-	if active.p == nil then
-		return
-	end
-	if active.si == 1 then
-		return
-	end
-	app.active = active.p.c[math.max(1, active.si - 1)]
-	if app.config.focus_lock then
-		ht.set_offset_to_active(app)
-		ht.render(app)
-	end
-	ht.focus_active(app)
+function M.pan_up(app)
+	app.offset.y = app.offset.y - app.config.y_speed
+	ht.render(app)
 end
 
-function M.down(app)
-	local active = app.active
-	if active.p == nil then
-		return
-	end
-	local nc = vim.tbl_count(active.p.c)
-	if active.si == nc then
-		return
-	end
-	app.active = active.p.c[math.min(nc, active.si + 1)]
-	if app.config.focus_lock then
-		ht.set_offset_to_active(app)
-		ht.render(app)
-	end
-	ht.focus_active(app)
+function M.pan_down(app)
+	app.offset.y = app.offset.y + app.config.y_speed
+	ht.render(app)
+end
+
+function M.pan_left(app)
+	app.offset.x = app.offset.x - app.config.x_speed
+	ht.render(app)
+end
+
+function M.pan_right(app)
+	app.offset.x = app.offset.x + app.config.x_speed
+	ht.render(app)
+end
+
+function M.pan_reset(app)
+  -- disable focus_lock
+  app.config.focus_lock = false
+	app.offset.x = 0
+	app.offset.y = 0
+	ht.render(app)
 end
 
 function M.edit_node(app)
@@ -164,11 +191,11 @@ function M.add_child(app, tree)
 		p.open = true
 		app.active = tree
 	end
-	if app.config.focus_lock then
-		ht.set_offset_to_active(app)
-	end
 	ht.render(app)
 	io.save_to_file(app)
+	if app.config.focus_lock then
+		M.focus_active(app)
+	end
 end
 
 function M.add_sibling(app, tree)
@@ -217,11 +244,11 @@ function M.add_sibling(app, tree)
 		sib.p.open = true
 		app.active = tree
 	end
-	if app.config.focus_lock then
-		ht.set_offset_to_active(app)
-	end
 	ht.render(app)
 	io.save_to_file(app)
+	if app.config.focus_lock then
+		M.focus_active(app)
+	end
 end
 
 function M.copy_node(app)
@@ -247,6 +274,9 @@ function M.paste_node_as_child(app)
 	-- hack for deep copy
 	io.reload(app)
 	ht.render(app)
+	if app.config.focus_lock then
+		M.focus_active(app)
+	end
 end
 
 function M.paste_node_as_sibling(app)
@@ -258,6 +288,17 @@ function M.paste_node_as_sibling(app)
 	local tree = app.config.clipboard[1]
 	-- avoid recursion ( shallow check )
 	M.add_sibling(app, tree)
+	if app.config.focus_lock then
+		M.focus_active(app)
+	end
+end
+
+function M.remove_node(app)
+	M.delete_node(app, false)
+end
+
+function M.cut_node(app)
+	M.delete_node(app, true)
 end
 
 function M.delete_node(app, cut)
@@ -288,6 +329,10 @@ function M.delete_node(app, cut)
 	end
 	io.save_to_file(app)
 	ht.render(app)
+
+	if app.config.focus_lock then
+		M.focus_active(app)
+	end
 end
 
 function M.align_levels(app)
@@ -297,6 +342,12 @@ end
 
 function M.focus_lock(app)
 	app.config.focus_lock = not app.config.focus_lock
+	M.focus_active(app)
+end
+
+function M.focus_active(app)
+	-- TODO: focus lock properly
+	-- app.config.focus_lock = not app.config.focus_lock
 	ht.set_offset_to_active(app)
 	ht.render(app)
 end

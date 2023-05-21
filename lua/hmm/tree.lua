@@ -166,19 +166,22 @@ function M.render_tree(buf, tree, config)
 	end
 end
 
+function M.layout(app)
+	if app.config.mode == "list" then
+		M.layout_list(app.root, app.config)
+	else
+		M.layout_htree(app.root, app.config)
+	end
+end
+
 function M.render(app)
 	-- reset size
 	local size = io.get_size_center(app.win)
 	app.size = { w = size.w, h = size.h }
 	app.center = { x = size.x, y = size.y }
 
-	-- recompute layout
-	-- M.position_root(app)
-	if app.config.mode == "list" then
-		M.layout_list(app.root, app.config)
-	else
-		M.layout_htree(app.root, app.config)
-	end
+	-- compute layout, so we get x, y of active
+	M.layout(app)
 
 	-- reset buffer
 	io.clear_win_buf(app.buf, app.size)
