@@ -4,6 +4,8 @@
 with an infinite pannable canvas, colorschemes, file explorer etc.
 
 Tested for use as standalone app, powered by `NVIM_APPNAME` from neovim.
+In other words, this requires no knowledge of vim, and does not mess with your current vim config.
+It is intended as plug and play replacement for h-m-m.
 
 Automatically installs needed dependencies ( i.e. plugins ) using [lazy.nvim](https://github.com/folke/lazy.nvim).
 
@@ -45,7 +47,7 @@ git clone https://github.com/manyids2/hmm.nvim
 cd hmm.nvim
 
 # Install hmm.nvim to XDG_CONFIG_DIR/nvim-apps/hmm.nvim
-# Installs shell script to /usr/bin/, asks for sudo
+# Installs shell script to `/usr/bin/hmm.nvim`, asks for sudo
 make install
 
 # Check out the main features
