@@ -7,6 +7,27 @@ Tested for use as standalone app, powered by `NVIM_APPNAME` from neovim.
 
 Automatically installs needed dependencies ( i.e. plugins ) using [lazy.nvim](https://github.com/folke/lazy.nvim).
 
+![hmm.nvim](./screenshots/hmm.png)
+
+Thanks to neovim as backend, we get file explorer, find files, etc. for free.
+
+![find-files](./screenshots/find-files.png)
+
+Help is inbuilt.
+
+![help](./screenshots/help.png)
+
+Can support any neovim colorscheme.
+
+![carbonfox](./screenshots/carbonfox.png)
+![dayfox](./screenshots/dayfox.png)
+![tokyonight-storm](./screenshots/tokyonight.png)
+![forestbones](./screenshots/forestbones.png)
+
+ This is still work in progress. The implementation is spaghetti.
+
+It is indended as proof of concept of using neovim as TUI backend.
+
 ## Installation
 
 First install Neovim >= 0.9 ( which supports `NVIM_APPNAME` ) from [here](https://neovim.io/).
@@ -17,17 +38,20 @@ Then clone the repo, install and check out an example.
 git clone https://github.com/manyids2/hmm.nvim
 cd hmm.nvim
 
-# Install to XDG_CONFIG_DIR/nvim-apps/hmm.nvim
+# Install hmm.nvim to XDG_CONFIG_DIR/nvim-apps/hmm.nvim
+# Installs shell script to /usr/bin/, asks for sudo
 make install
 
-# Instructions for example run
-make run
+# Check out the main features
+cd examples
+hmm.nvim hello.hmm
 ```
 
 ## Main diff compared to h-m-m
 
 - Pan canvas
 - Open multiple files
+- Many many colorschemes
 - (planned) Mouse support
 - (planned) Toggle each node between list, tree, and `text` views
 - (planned) Link to external maps, break off trees, render on infinite canvas, etc.
@@ -53,6 +77,7 @@ make run
 
 ## Roadmap
 
+- config, help as hmm files
 - multiline text
 - feature parity
 - proper return from telescope
