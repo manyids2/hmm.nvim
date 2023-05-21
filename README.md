@@ -21,10 +21,12 @@ Help is inbuilt.
 
 Can support any neovim colorscheme.
 
-![carbonfox](./screenshots/carbonfox.png)
-![dayfox](./screenshots/dayfox.png)
-![tokyonight-storm](./screenshots/tokyonight.png)
-![forestbones](./screenshots/forestbones.png)
+<img src="./screenshots/carbonfox.png"/>
+
+<!-- ![carbonfox](./screenshots/carbonfox.png) -->
+<!-- ![dayfox](./screenshots/dayfox.png) -->
+<!-- ![tokyonight-storm](./screenshots/tokyonight.png) -->
+<!-- ![forestbones](./screenshots/forestbones.png) -->
 
 ⚠ This is still work in progress. The implementation is spaghetti.
 
