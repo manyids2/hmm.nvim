@@ -1,15 +1,24 @@
-hello|10
+hello|11
 	welcome|10
 		to|00
 		hmm.nvim!|00
 	get help|00
 		press ?|00
-		try turning it off and on|10
+		if top line is wonky|00
+		try turning it off and on|00
 			reset|10
 				esc|00
 			reload|10
 				ctrl+s|00
-	infinite canvas|01
+	basics|10
+		quit|10
+			q|00
+		toggle|10
+			space|00
+		navigate|10
+			up, down, left, right|00
+			k, j, h, l|00
+	infinite canvas|00
 		toggle|00
 			node|10
 				space|00
@@ -21,8 +30,6 @@ hello|10
 			alt+dir|00
 			reset|10
 				0|00
-		toggle|00
-			space|00
 		focus, lock|00
 			focus lock|10
 				C|00
@@ -35,6 +42,7 @@ hello|10
 			undo - u|00
 			redo - ctrl+r|00
 			undo, redo across sessions!|00
+		  press esc after loading file from search|00
 		colorschemes|00
 			;c|00
 		find file|00
@@ -48,5 +56,6 @@ hello|10
 			tab|00
 		move the nodes|00
 			shift+dir|00
-		cut copy paste|00
+		cut, copy, paste|00
 			d, y, p|00
+			🐱 make sure to avoid recursion|00
