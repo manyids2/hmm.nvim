@@ -8,7 +8,7 @@ local plugins = {
 		run = ":TSUpdate",
 		config = function()
 			require("nvim-treesitter.configs").setup({
-				ensure_installed = { "lua", "html", "css" },
+				ensure_installed = { "markdown" },
 				auto_install = true,
 			})
 		end,
@@ -72,10 +72,10 @@ local plugins = {
 	"bluz71/vim-nightfly-colors",
 	"folke/tokyonight.nvim",
 	"aktersnurra/no-clown-fiesta.nvim",
-  "nyoom-engineering/oxocarbon.nvim",
+	"nyoom-engineering/oxocarbon.nvim",
 	"mcchrish/zenbones.nvim",
 	"nvim-tree/nvim-web-devicons",
-  "EdenEast/nightfox.nvim",
+	"EdenEast/nightfox.nvim",
 
 	-- neotree, bufferline?
 	{
@@ -95,10 +95,10 @@ local plugins = {
 	},
 
 	-- Dev
-	-- { dir = "/home/x/fd/code/nvim-stuff/hmm.nvim" },
+	{ dir = "/home/x/fd/code/nvim-stuff/hmm.nvim" },
 
 	-- Release
-	{ "manyids2/hmm.nvim" },
+	-- { "manyids2/hmm.nvim" },
 }
 
 require("lazy").setup(plugins)
