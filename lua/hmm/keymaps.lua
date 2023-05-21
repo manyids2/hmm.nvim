@@ -1,302 +1,92 @@
-local h = require("hmm.help")
-local t = require("hmm.htree")
-local r = require("hmm.render")
+local ht = require("hmm.tree")
+local hh = require("hmm.help")
+local he = require("hmm.export")
+local ax = require("hmm.actions")
 
 local M = {}
 
-function M.open_children(tree)
-	if vim.tbl_count(tree.c) == 0 then
-		return
-	end
-	tree.open = true
-	for _, child in ipairs(tree.c) do
-		M.open_children(child)
-	end
+function M.map(mode, lhs, rhs, desc, app)
+	vim.keymap.set(mode, lhs, function()
+		rhs(app)
+	end, { desc = desc, buffer = app.buf })
 end
 
-function M.open_all(app)
-	M.open_children(app.tree)
-	r.render(app)
-end
-
-function M.toggle(app)
-	if vim.tbl_count(app.active.c) == 0 then
-		app.active = app.active.p
-	end
-	if app.active ~= nil then
-		app.active.open = not app.active.open
-	end
-	r.render(app)
-end
-
-function M.left(app)
-	local active = app.active
-	if active.p == nil then
-		return
-	end
-	app.active = active.p
-	r.focus_active(app)
-end
-
-function M.right(app)
-	local active = app.active
-	if not active.open and vim.tbl_count(active.c) > 0 then
-		active.open = true
-		r.render(app)
-	end
-	if active.nc ~= 0 then
-		local dist = 999
-		local index = 1
-		for i, child in ipairs(active.c) do
-			local d = math.abs(child.y - (active.y + active.o))
-			if d < dist then
-				dist = d
-				index = i
-			end
-		end
-		app.active = active.c[index]
-		r.focus_active(app)
-	end
-end
-
-function M.up(app)
-	local active = app.active
-	if active.p == nil then
-		return
-	end
-	if active.si == 1 then
-		return
-	end
-	app.active = active.p.c[math.max(1, active.si - 1)]
-	r.focus_active(app)
-end
-
-function M.down(app)
-	local active = app.active
-	if active.p == nil then
-		return
-	end
-	if active.si == active.ns then
-		return
-	end
-	app.active = active.p.c[math.min(active.ns, active.si + 1)]
-	r.focus_active(app)
-end
-
-function M.copy(app)
-	local active = app.active
-	t.copy_node(active, app)
-	r.render(app)
-end
-
-function M.delete(app, to_clipboard)
-	local active = app.active
-	t.delete_node(active, app, to_clipboard)
-	r.render(app)
-end
-
-function M.edit_node(app, blank)
-	local active = app.active
-	if blank then
-		t.edit_node(active, app, { default = "" })
-	else
-		t.edit_node(active, app, { default = active.text })
-	end
-	r.render(app)
-end
-
-function M.add_child(app, from_clipboard)
-	local active = app.active
-	active.open = true
-	t.add_child(active, app, from_clipboard)
-	r.render(app)
-end
-
-function M.add_sibling(app)
-	local active = app.active
-	t.add_sibling(active, app)
-	r.render(app)
-end
-
-function M.move_sibling(app, up_down)
-	local active = app.active
-	t.move_sibling(active, up_down, app)
-	r.render(app)
-end
-
-function M.save(app)
-  r.render(app)
-	t.save_to_file(app)
-end
-
-function M.undo(app)
-	t.undo(app)
-	r.render(app)
-end
-
-function M.redo(app)
-	t.redo(app)
-	r.render(app)
-end
-
-function M.global_keymaps(app)
+function M.buffer_keymaps(app)
 	local map = vim.keymap.set
+	-- quit, help, export
+	M.map("n", "q", ax.quit, "quit", app)
+	M.map("n", "?", hh.open_help, "help", app)
+	M.map("n", "<C-x>", he.open_export, "export", app)
 
-	-- focus active
-	map("n", "f", function()
-		r.focus_active(app)
-	end, { desc = "Focus" })
-
-	-- save to source
-	map("n", "s", function()
-		M.save(app)
-	end, { buffer = app.buf, desc = "Save" })
-
-	-- quit
-	map("n", "<esc>", function()
-		M.save(app)
-		vim.cmd([[qa]])
-	end, { buffer = app.buf, desc = "Quit" })
-
-	-- save to source
-	map("n", "q", function()
-		M.save(app)
-		vim.cmd([[qa]])
-	end, { buffer = app.buf, desc = "Quit" })
-
-	-- toggle node
-	map("n", "<space>", function()
-		M.toggle(app)
-	end, { buffer = app.buf, desc = "Toggle" })
+	-- toggle
+	M.map("n", "<space>", ax.toggle, "toggle", app)
+	M.map("n", "b", ax.open_all, "open all", app)
+	M.map("n", "B", ax.close_all, "close all", app)
 
 	-- navigation
-	map("n", "k", function()
-		M.up(app)
-	end, { buffer = app.buf, desc = "Up" })
+	M.map("n", "k", ax.up, "up", app)
+	M.map("n", "j", ax.down, "down", app)
+	M.map("n", "h", ax.left, "left", app)
+	M.map("n", "l", ax.right, "right", app)
+	M.map("n", "<up>", ax.up, "up", app)
+	M.map("n", "<down>", ax.down, "down", app)
+	M.map("n", "<left>", ax.left, "left", app)
+	M.map("n", "<right>", ax.right, "right", app)
 
-	map("n", "<up>", function()
-		M.up(app)
-	end, { buffer = app.buf, desc = "Up" })
+	-- pan
+	M.map("n", "<M-k>", ax.pan_up, "pan up", app)
+	M.map("n", "<M-j>", ax.pan_down, "pan down", app)
+	M.map("n", "<M-h>", ax.pan_left, "pan left", app)
+	M.map("n", "<M-l>", ax.pan_right, "pan right", app)
+	M.map("n", "0", ax.pan_reset, "pan reset", app)
 
-	map("n", "j", function()
-		M.down(app)
-	end, { buffer = app.buf, desc = "Down" })
+	-- focus
+	M.map("n", "~", ax.focus_root, "focus root", app)
+	M.map("n", "m", ax.focus_root, "focus root", app)
+	M.map("n", "c", ax.focus_active, "focus active", app)
+	M.map("n", "C", ax.focus_lock, "focus lock", app)
 
-	map("n", "<down>", function()
-		M.down(app)
-	end, { buffer = app.buf, desc = "Down" })
+	-- edit
+	M.map("n", "e", ax.edit_node_preserve, "edit node", app)
+	M.map("n", "s", ax.edit_node_preserve, "edit node", app)
+	M.map("n", "a", ax.edit_node_preserve, "edit node", app)
+	M.map("n", "i", ax.edit_node_preserve, "edit node", app)
+	M.map("n", "E", ax.edit_node, "edit node from blank", app)
+	M.map("n", "S", ax.edit_node, "edit node from blank", app)
+	M.map("n", "A", ax.edit_node, "edit node from blank", app)
+	M.map("n", "I", ax.edit_node, "edit node from blank", app)
 
-	map("n", "h", function()
-		M.left(app)
-	end, { buffer = app.buf, desc = "Left" })
+	-- add
+	M.map("n", "<enter>", ax.add_sibling, "add sibling", app)
+	M.map("n", "o", ax.add_sibling, "add sibling", app)
+	M.map("n", "<tab>", ax.add_child, "add child", app)
+	M.map("n", "O", ax.add_child, "add child", app)
 
-	map("n", "<left>", function()
-		M.left(app)
-	end, { buffer = app.buf, desc = "Left" })
+	-- move
+	M.map("n", "K", ax.move_sibling_up, "move up", app)
+	M.map("n", "J", ax.move_sibling_down, "move down", app)
 
-	map("n", "l", function()
-		M.right(app)
-	end, { buffer = app.buf, desc = "Right" })
+	-- copy node -- need to make deep copy
+	-- or check if was copied, then write
+	-- to file and reload, so expensive for now
+	M.map("n", "y", ax.copy_node, "copy node", app)
+	M.map("n", "d", ax.cut_node, "cut node", app)
+	M.map("n", "<delete>", ax.delete_node, "delete node", app)
+	M.map("n", "p", ax.paste_node_as_child, "paste node as child", app)
+	M.map("n", "P", ax.paste_node_as_sibling, "paste node as sibling", app)
 
-	map("n", "<right>", function()
-		M.right(app)
-	end, { buffer = app.buf, desc = "Right" })
+	-- manual refreshes
+	M.map("n", "<esc>", ht.render, "render", app)
+	M.map("n", "<c-s>", ax.reset, "reset", app)
 
-	map("n", "<delete>", function()
-		M.delete(app, false)
-	end, { buffer = app.buf, desc = "Delete" })
+	-- undo, redo
+	M.map("n", "u", ax.undo, "undo", app)
+	M.map("n", "<c-r>", ax.redo, "redo", app)
 
-	map("n", "d", function()
-		M.delete(app, true)
-	end, { buffer = app.buf, desc = "Cut" })
-
-	map("n", "y", function()
-		M.copy(app)
-	end, { buffer = app.buf, desc = "Copy" })
-
-	map("n", "<tab>", function()
-		M.add_child(app, false)
-		M.save(app)
-	end, { buffer = app.buf, desc = "Add child" })
-
-	map("n", "p", function()
-		if app.clipboard[vim.tbl_count(app.clipboard)] == app.active then
-			return
-		end
-		M.add_child(app, true)
-		M.save(app)
-		t.reload(app)
-		r.render(app)
-	end, { buffer = app.buf, desc = "Paste as child" })
-
-	map("n", "<enter>", function()
-		M.add_sibling(app)
-		M.save(app)
-	end, { buffer = app.buf, desc = "Add sibling" })
-
-	map("n", "e", function()
-		M.edit_node(app, false)
-		M.save(app)
-	end, { buffer = app.buf, desc = "Edit" })
-
-	map("n", "i", function()
-		M.edit_node(app, false)
-		M.save(app)
-	end, { buffer = app.buf, desc = "Edit" })
-
-	map("n", "a", function()
-		M.edit_node(app, false)
-		M.save(app)
-	end, { buffer = app.buf, desc = "Edit" })
-
-	map("n", "E", function()
-		M.edit_node(app, true)
-		M.save(app)
-	end, { buffer = app.buf, desc = "Edit from blank" })
-
-	map("n", "I", function()
-		M.edit_node(app, true)
-		M.save(app)
-	end, { buffer = app.buf, desc = "Edit from blank" })
-
-	map("n", "A", function()
-		M.edit_node(app, true)
-		M.save(app)
-	end, { buffer = app.buf, desc = "Edit from blank" })
-
-	map("n", "K", function()
-		M.move_sibling(app, "up")
-	end, { buffer = app.buf, desc = "Move up" })
-
-	map("n", "J", function()
-		M.move_sibling(app, "down")
-	end, { buffer = app.buf, desc = "Move down" })
-
-	map("n", "b", function()
-		M.open_all(app)
-	end, { buffer = app.buf, desc = "Open all" })
-
-	map("n", "?", function()
-		h.open_help(app)
-	end, { buffer = app.buf, desc = "Open help" })
-
-	map("n", "u", function()
-		M.undo(app)
-	end, { buffer = app.buf, desc = "Undo" })
-
-	map("n", "<c-r>", function()
-		M.redo(app)
-	end, { buffer = app.buf, desc = "Redo" })
-
+	-- debug
 	map("n", "t", function()
-		vim.cmd([[:messages clear]])
-		t.print_tree(app.active)
-		vim.cmd([[:messages]])
-	end, { buffer = app.buf, desc = "Print tree" })
-
-	map("n", "~", function()
-		vim.cmd([[:messages]])
-	end, { buffer = app.buf, desc = "Messages" })
+		print(app.active.tw, app.active.th)
+	end, { desc = "Debug" })
 end
 
 return M

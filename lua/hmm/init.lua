@@ -1,39 +1,34 @@
 local a = vim.api
-local t = require("hmm.htree")
-local r = require("hmm.render")
-local k = require("hmm.keymaps")
+local io = require("hmm.io")
+local ht = require("hmm.tree")
+local km = require("hmm.keymaps")
 
-local app = {}
-app.clipboard = {}
+local M = {}
 
-app.default_config = {
-	max_parent_node_width = 25,
-	max_leaf_node_width = 55,
-	line_spacing = 1,
+M.default_config = {
 	margin = 9,
-	align_levels = 0,
+	line_spacing = 1,
 	initial_depth = 1,
-	center_lock = true,
 	focus_lock = false,
+	center_lock = true,
+	align_levels = false,
+	max_leaf_node_width = 55,
+	max_parent_node_width = 25,
+	list_indent = 4,
+	x_speed = 5,
+	y_speed = 2,
+	mode = "tree",
+	help = "general",
+	clipboard = {},
 }
 
-function app.set_offset_size(win)
-	app.size = { w = a.nvim_win_get_width(win), h = a.nvim_win_get_height(win) }
-	app.offset = math.floor(app.size.h / 2) - 2
-end
-
-function app.setup(config)
-	-- return if not hmm file
-	local filetype = a.nvim_exec2("echo expand('%:e')", { output = true }).output
-	if filetype ~= "hmm" then
-		return
-	end
-
+function M.init(config)
+	local app = {}
 	-- get config
 	if config == nil then
-		config = app.default_config
+		config = M.default_config
 	end
-	app.config = vim.tbl_extend("keep", config, app.default_config)
+	app.config = vim.tbl_extend("keep", config, M.default_config)
 
 	-- need to reopen, else nlines is 0
 	app.filename = a.nvim_exec2("echo expand('%')", { output = true }).output
@@ -41,34 +36,48 @@ function app.setup(config)
 	-- Get the content
 	vim.cmd("e " .. app.filename)
 	app.file_buf = a.nvim_get_current_buf()
-	local lines = a.nvim_buf_get_lines(app.file_buf, 0, -1, false)
+	a.nvim_buf_set_option(app.file_buf, "buflisted", false)
 
 	-- get win, buf
 	app.win = a.nvim_get_current_win()
 	app.buf = a.nvim_create_buf(true, true)
+	local ns = string.len(app.filename)
+	a.nvim_buf_set_name(app.buf, string.sub(app.filename, 1, ns - 4))
 	a.nvim_win_set_buf(app.win, app.buf)
-	r.hide_cursor()
 
-	-- Reset size on resize
-	local au_resize = a.nvim_create_augroup("hmm_resize", { clear = true })
-	a.nvim_create_autocmd({ "VimResized" }, {
-		group = au_resize,
-		callback = function()
-			local win = a.nvim_get_current_win()
-			app.set_offset_size(win)
-			r.render(app)
-		end,
-	})
-
-	-- create tree
-	app.set_offset_size(app.win)
-	t.reload(app)
-
-	-- set global keymaps
-	k.global_keymaps(app)
-
-	-- render
-	r.render(app)
+	app.offset = { x = 0, y = 0 }
+	return app
 end
 
-return app
+function M.setup(config)
+	-- return if not hmm file
+	local filetype = a.nvim_exec2("echo expand('%:e')", { output = true }).output
+	if filetype ~= "hmm" then
+		return
+	end
+
+	-- BUG: this check is not working
+	local filename = a.nvim_exec2("echo expand('%')", { output = true }).output
+	local ns = string.len(filename)
+	local fname = string.sub(filename, 1, ns - 4)
+	for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+		local bufname = vim.api.nvim_buf_get_name(buf)
+		if bufname == fname then
+			return
+		end
+	end
+
+	-- initialize win, buf, filename, etc
+	local app = M.init(config)
+
+	-- read file and parse to tree
+	io.reload(app)
+
+	-- set app keymaps
+	km.buffer_keymaps(app)
+
+	-- finally, render
+	ht.render(app)
+end
+
+return M
