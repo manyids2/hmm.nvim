@@ -12,10 +12,10 @@ export ANNOUNCE_INSTALL
 install:
 	git clone ./.git ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim
 	# rm -r ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim/lua/hmm
-	cd hmm.nvim
+	cd ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim
 	chmod +x hmm.nvim
-	sudo cp hmm.nvim /usr/bin/hmm.nvim
 	@echo "$$ANNOUNCE_INSTALL"
+	sudo cp hmm.nvim /usr/bin/hmm.nvim
 
 define ANNOUNCE_DEV
 

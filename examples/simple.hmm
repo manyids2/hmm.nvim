@@ -3,7 +3,7 @@ simple|10
 	to|00
 		hello|00
 		hi|10
-	some|10
+	some|00
 		see|10
 			to|00
 			done|00
@@ -16,17 +16,17 @@ simple|10
 				hi|00
 		i|00
 		write?|00
-	stuff|10
+	stuff|01
 		hi|10
 		hello|00
 		hello|00
-	stuff|11
+	stuff|00
 		hello|00
-		hi|00
+		hi|10
 			hello|00
 			hi|00
 			how|00
-			hi|00
+			hi|10
 				hello|00
 				hi|00
 				how|00

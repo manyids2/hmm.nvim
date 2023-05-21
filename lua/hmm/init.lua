@@ -20,7 +20,7 @@ M.default_config = {
 	mode = "tree",
 	help = "general",
 	clipboard = {},
-	colorscheme = "forestbones",
+	colorscheme = "carbonfox",
 	background = "dark",
 }
 

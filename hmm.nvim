@@ -1,3 +1,5 @@
-#!/bin/bash
+#!/usr/bin/bash
 
-export NVIM_APPNAME=nvim-apps/hmm.nvim; nvim
+export NVIM_APPNAME=nvim-apps/hmm.nvim
+exec nvim "$@"
+
