@@ -1,18 +1,18 @@
 hmm|10
 	README|00
-	bootstrap|10
+	bootstrap|01
 		init|00
 		lazy|00
 		options|00
 		keymaps|00
 		plugins|00
-	hmm|10
+	hmm|00
 		init|00
 		config|00
 		io|00
 			lines_to_tree|00
 			tree_to_lines|00
-		tree|01
+		tree|00
 			layout|00
 				layout_tree|00
 				layout_list|00

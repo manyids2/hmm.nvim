@@ -1,15 +1,15 @@
-hello|11
-	welcome|00
+hello|10
+	welcome|10
 		to|00
 		hmm.nvim!|00
 	get help|00
 		press ?|00
-		try turning it off and on|00
+		try turning it off and on|10
 			reset|10
 				esc|00
 			reload|10
 				ctrl+s|00
-	infinite canvas|00
+	infinite canvas|01
 		toggle|00
 			node|10
 				space|00
@@ -31,16 +31,16 @@ hello|11
 			focus root|10
 				~, m|00
 	free features|00
+		undo redo|00
+			undo - u|00
+			redo - ctrl+r|00
+			undo, redo across sessions!|00
 		colorschemes|00
 			;c|00
 		find file|00
 			;f|00
 		search files|00
 			;g|00
-		undo redo|00
-			undo - u|00
-			redo - ctrl+r|00
-			undo, redo across sessions!|00
 	basic node stuff|00
 		add a sibling|00
 			enter|00
