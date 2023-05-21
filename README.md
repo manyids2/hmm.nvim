@@ -21,7 +21,7 @@ Help is inbuilt.
 
 Can support any neovim colorscheme.
 
-<img src="./screenshots/carbonfox.png"/>
+<img src="./screenshots/carbonfox.png" alt="carbonfox" style="width:200px;"/>
 
 <!-- ![carbonfox](./screenshots/carbonfox.png) -->
 <!-- ![dayfox](./screenshots/dayfox.png) -->
@@ -31,8 +31,6 @@ Can support any neovim colorscheme.
 ⚠ This is still work in progress. The implementation is spaghetti.
 
 It is indended as proof of concept of using neovim as TUI backend.
-
-
 
 ## Installation
 
@@ -216,8 +214,8 @@ The following are the settings in h-m-m:
 
 Fonts in screenshots:
 ( For [kitty](https://sw.kovidgoyal.net/kitty) terminal )
-- font_family      Fira Code Regular Nerd Font Complete
-- italic_font      Blex Mono Light Italic Nerd Font Complete
-- bold_font        Blex Mono Bold Nerd Font Complete
-- bold_italic_font Blex Mono SemiBold Italic Nerd Font Complete
 
+- font_family Fira Code Regular Nerd Font Complete
+- italic_font Blex Mono Light Italic Nerd Font Complete
+- bold_font Blex Mono Bold Nerd Font Complete
+- bold_italic_font Blex Mono SemiBold Italic Nerd Font Complete
