@@ -6,6 +6,19 @@ Tested for use as standalone program, powered by NVIM_APPNAME from neovim.
 
 Automatically installs needed dependencies ( i.e. plugins ) using lazy.nvim.
 
+## Installation
+
+```bash
+git clone https://github.com/manyids2/hmm.nvim
+cd hmm.nvim
+
+# Install to XDG_CONFIG_DIR/nvim-apps/hmm.nvim
+make install
+
+# Instructions for example run
+make run
+```
+
 ## Main diff compared to h-m-m
 
 - Pan canvas

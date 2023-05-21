@@ -2,7 +2,7 @@
 
 define ANNOUNCE_INSTALL
 
-	   = 🔥
+	 = 🔥
 
   Setup first time with
 
@@ -24,23 +24,41 @@ export ANNOUNCE_DELETE
 
 define ANNOUNCE_RUN
 
-     = 🔥
+   = 🔥
 
   Set NVIM_APPNAME ( currently:  ${NVIM_APPNAME} )
 
   bash: export NVIM_APPNAME=nvim-apps/hmm.nvim
   fish: set -x NVIM_APPNAME nvim-apps/hmm.nvim
 
-  Go to examples folder, open index.html file
+  Go to examples folder, open hello.hmm file
 
-  cd ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim/examples; nvim index.html
+  cd ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim/examples; nvim hello.hmm
 
 endef
 export ANNOUNCE_RUN
 
+define ANNOUNCE_DEV
+
+   = 🔥
+
+  Set NVIM_APPNAME ( currently:  ${NVIM_APPNAME} )
+
+	Set dev dir as plugin in lua/bootstrap/plugins.lua
+
+  bash: export NVIM_APPNAME=nvim-apps/hmm.nvim
+  fish: set -x NVIM_APPNAME nvim-apps/hmm.nvim
+
+  Go to examples folder, open hello.hmm file
+
+  cd ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim/examples; nvim hello.hmm
+
+endef
+export ANNOUNCE_DEV
+
 install:
 	git clone ./.git ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim
-	rm -r ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim/lua/hmm
+	# rm -r ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim/lua/hmm
 	@echo "$$ANNOUNCE_INSTALL"
 
 dev:

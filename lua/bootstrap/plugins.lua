@@ -94,8 +94,11 @@ local plugins = {
     },
   },
 
-  -- The juice
-  { dir = "/home/x/fd/code/nvim-stuff/hmm.nvim" },
+  -- Dev
+  -- { dir = "/home/x/fd/code/nvim-stuff/hmm.nvim" },
+
+  -- Release
+  { "manyids2/hmm.nvim" },
 }
 
 require("lazy").setup(plugins)

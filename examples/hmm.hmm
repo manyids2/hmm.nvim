@@ -1,6 +1,6 @@
 hmm|10
 	README|00
-	bootstrap|00
+	bootstrap|01
 		init|00
 		lazy|00
 		options|00
@@ -15,7 +15,7 @@ hmm|10
 			separate|00
 		tree|10
 			lines_to_ptree|00
-		htree|11
+		htree|10
 			lines_to_htree|00
 			new_Tree|00
 			set_ci|00

@@ -1,24 +1,24 @@
-something|10
-	else|10
+something|11
+	else|00
 		you|00
 		know|00
 	and|00
 		else|10
 			you|00
 			know|00
-	more|10
+	more|00
 		to|00
-		new note|10
+		new note|00
 			we|10
 				nee|00
-				to|00
+				to|10
 					need|10
 						to|00
 				fix|00
 		here|00
-	hello there!|11
+	hello there!|00
 		do|00
-		we|10
+		we|00
 			nee|00
 			to|00
 			fix|00

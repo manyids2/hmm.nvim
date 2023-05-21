@@ -13,7 +13,7 @@ end
 
 M.shortcuts = [[
 
-  (<enter>) General (n) Node (v) View (m) Misc
+  (<enter>) General (n) Node (v) View (f) File
 
 ]]
 M.lines = {
@@ -35,6 +35,10 @@ M.lines = {
      ↓ , j  ───  to next sibling
      ← , h  ───  to parent
      → , l  ───  to child
+
+        ;c  ───  colorschemes
+        ;f  ───  find file ( press <esc> after it opens  )
+
 ]],
 	node = M.shortcuts .. [[
 
@@ -71,14 +75,12 @@ E, A, S, I  ───  edit from blank
       ~, m  ───  focus root
 
 ]],
-	misc = M.shortcuts .. [[
+	file = M.shortcuts .. [[
 
-  Misc actions:
+  File actions:
 
          H  ───  next file
          L  ───  prev file
-
-        ;c  ───  colorschemes
 
         ;f  ───  find file ( press <esc> after it opens  )
         ;g  ───  search all files
@@ -119,7 +121,7 @@ function M.open_help(app)
 	M.map(win, buf, opts, "<enter>", "general")
 	M.map(win, buf, opts, "n", "node")
 	M.map(win, buf, opts, "v", "view")
-	M.map(win, buf, opts, "m", "misc")
+	M.map(win, buf, opts, "f", "file")
 	M.render(win, buf, opts)
 end
 
