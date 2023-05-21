@@ -4,41 +4,10 @@ local io = require("hmm.io")
 local M = {}
 
 M.lines = {
-	default = [[
-         s : save
-  <esc>, q : quit
-         ? : help
-     <C-x> : export
-
-     ↑ , k : up
-     ↓ , j : down
-     ← , h : left
-     → , l : right
-   <space> : toggle children
-
-<enter>, o : new sibling
-  <tab>, O : new child
-         d : delete node and descendents
-
-         J : move node down
-         K : move node up
-
-]],
-	nodes = [[
-         s : save
-  <esc>, q : quit
-<enter>, o : new sibling
-  <tab>, O : new child
-         d : delete node and descendents
-]],
-	marks = [[
-o, <enter> : new sibling
-O,   <tab> : new child
-         d : delete node and descendents
-]],
+	default = "Export",
 }
 
-function M.open_help(app)
+function M.open_export(app)
 	local height = a.nvim_win_get_height(app.win)
 	local width = a.nvim_win_get_width(app.win)
 

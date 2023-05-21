@@ -16,35 +16,13 @@ simple|10
 				hi|00
 		i|00
 		write?|00
-	stuff|00
+	stuff|10
 		hi|10
 		hello|00
 		hello|00
-	siblings|00
-		stuff|10
-			hello|00
-			hi|00
-		to|10
-			hello|00
-			hi|10
-	hi|10
+	stuff|11
 		hello|00
 		hi|00
-		how|01
-		hi|10
-			hello|00
-			hi|00
-			how|00
-			are|00
-			you|00
-			doing|00
-		are|00
-		you|00
-		doing|00
-	new node of coursxe|00
-	stuff|00
-		hello|00
-		hi|10
 			hello|00
 			hi|00
 			how|00
@@ -59,5 +37,27 @@ simple|10
 			you|00
 			doing|00
 		hi|00
+	hi|00
+		hello|00
+		hi|00
+		how|00
+		hi|10
+			hello|00
+			hi|00
+			how|00
+			are|00
+			you|00
+			doing|00
+		are|00
+		you|00
+		doing|00
+	siblings|00
+		stuff|10
+			hello|00
+			hi|00
+		to|10
+			hello|00
+			hi|10
+	new node of course|00
 	more stuff|10
 		new stuff|00
