@@ -185,6 +185,7 @@ function M.render(app)
 
   -- reset buffer
   io.clear_win_buf(app.buf, app.size)
+  io.show_help(app.win, app.buf)
 
   -- render to buffer
   M.render_tree(app.buf, app.root, app.config)

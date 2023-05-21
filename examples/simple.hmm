@@ -27,10 +27,10 @@ simple|10
 		to|10
 			hello|00
 			hi|10
-	hi|00
+	hi|10
 		hello|00
 		hi|00
-		how|00
+		how|01
 		hi|10
 			hello|00
 			hi|00
@@ -60,4 +60,4 @@ simple|10
 			doing|00
 		hi|00
 	more stuff|10
-		new stuff|01
+		new stuff|00

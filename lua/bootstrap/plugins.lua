@@ -50,25 +50,17 @@ local plugins = {
     "folke/noice.nvim",
     event = "VeryLazy",
     opts = {
-      cmdline = {
-        enabled = true,     -- enables the Noice cmdline UI
-        view = "cmdline_popup", -- view for rendering the cmdline. Change to `cmdline` to get a classic cmdline at the bottom
-        opts = {},          -- global options for the cmdline. See section on views
-        format = {
-          -- opts: any options passed to the view
-          cmdline = { pattern = "^:", icon = "", lang = "vim" },
-          search_down = false,
-          search_up = false,
-          filter = false,
-          lua = false,
-          help = false,
-          input = {}, -- Used by input()
+      views = {
+        cmdline_popup = {
+          border = {
+            style = "none",
+            padding = { 2, 3 },
+          },
+          filter_options = {},
+          win_options = {
+            winhighlight = "NormalFloat:NormalFloat,FloatBorder:FloatBorder",
+          },
         },
-      },
-      presets = {
-        bottom_search = true,
-        command_palette = true,
-        long_message_to_split = true,
       },
     },
   },
