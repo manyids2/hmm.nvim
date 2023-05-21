@@ -1,12 +1,17 @@
 # hmm.nvim
 
-h-m-m for neovim, with an infinite pannable canvas, colorschemes, file explorer etc.
+[h-m-m](https://github.com/nadrad/h-m-m) for [neovim](https://neovim.io/),
+with an infinite pannable canvas, colorschemes, file explorer etc.
 
-Tested for use as standalone program, powered by NVIM_APPNAME from neovim.
+Tested for use as standalone app, powered by `NVIM_APPNAME` from neovim.
 
-Automatically installs needed dependencies ( i.e. plugins ) using lazy.nvim.
+Automatically installs needed dependencies ( i.e. plugins ) using [lazy.nvim](https://github.com/folke/lazy.nvim).
 
 ## Installation
+
+First install Neovim >= 0.9 ( which supports `NVIM_APPNAME` ) from [here](https://neovim.io/).
+
+Then clone the repo, install and check out an example.
 
 ```bash
 git clone https://github.com/manyids2/hmm.nvim

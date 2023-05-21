@@ -31,9 +31,9 @@ define ANNOUNCE_RUN
   bash: export NVIM_APPNAME=nvim-apps/hmm.nvim
   fish: set -x NVIM_APPNAME nvim-apps/hmm.nvim
 
-  Go to examples folder, open hello.hmm file
+  Go to examples folder, open all hmm files
 
-  cd ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim/examples; nvim hello.hmm
+  cd ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim/examples; nvim *.hmm
 
 endef
 export ANNOUNCE_RUN
@@ -42,16 +42,9 @@ define ANNOUNCE_DEV
 
    = 🔥
 
-  Set NVIM_APPNAME ( currently:  ${NVIM_APPNAME} )
-
 	Set dev dir as plugin in lua/bootstrap/plugins.lua
 
-  bash: export NVIM_APPNAME=nvim-apps/hmm.nvim
-  fish: set -x NVIM_APPNAME nvim-apps/hmm.nvim
-
-  Go to examples folder, open hello.hmm file
-
-  cd ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim/examples; nvim hello.hmm
+   = 🔥
 
 endef
 export ANNOUNCE_DEV
@@ -65,6 +58,7 @@ dev:
 	rm -rf ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim
 	cp -r ./ ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim/
 	rm -r ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim/lua/hmm
+	@echo "$$ANNOUNCE_DEV"
 	@echo "$$ANNOUNCE_INSTALL"
 
 run:
