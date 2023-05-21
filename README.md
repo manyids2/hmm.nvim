@@ -26,26 +26,10 @@ Can support any neovim colorscheme.
 ![tokyonight-storm](./screenshots/tokyonight.png)
 ![forestbones](./screenshots/forestbones.png)
 
- This is still work in progress. The implementation is spaghetti.
+⚠ This is still work in progress. The implementation is spaghetti.
 
 It is indended as proof of concept of using neovim as TUI backend.
 
-
-<div style="font-size: 0.5rem;">
-
-Fonts in screenshots:
-
-( For [kitty](https://sw.kovidgoyal.net/kitty) terminal )
-
-font_family      Fira Code Regular Nerd Font Complete
-
-italic_font      Blex Mono Light Italic Nerd Font Complete
-
-bold_font        Blex Mono Bold Nerd Font Complete
-
-bold_italic_font Blex Mono SemiBold Italic Nerd Font Complete
-
-</div>
 
 
 ## Installation
@@ -225,3 +209,13 @@ The following are the settings in h-m-m:
 - [-] center_lock = false
 - [x] focus_lock = false
 - [o] max_undo_steps = 24
+
+## screenshots
+
+Fonts in screenshots:
+( For [kitty](https://sw.kovidgoyal.net/kitty) terminal )
+- font_family      Fira Code Regular Nerd Font Complete
+- italic_font      Blex Mono Light Italic Nerd Font Complete
+- bold_font        Blex Mono Bold Nerd Font Complete
+- bold_italic_font Blex Mono SemiBold Italic Nerd Font Complete
+
