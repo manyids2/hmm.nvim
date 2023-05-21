@@ -75,9 +75,14 @@ E, A, S, I  ───  edit from blank
 
   Misc actions:
 
+         H  ───  next file
+         L  ───  prev file
+
         ;c  ───  colorschemes
+
         ;f  ───  find file ( press <esc> after it opens  )
         ;g  ───  search all files
+
        ;ds  ───  open directory in split
        ;df  ───  open directory in float
 
