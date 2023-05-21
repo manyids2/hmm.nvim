@@ -28,6 +28,10 @@ function M.buffer_keymaps(app)
 	M.map("n", "j", ax.down, "down", app)
 	M.map("n", "h", ax.left, "left", app)
 	M.map("n", "l", ax.right, "right", app)
+	M.map("n", "<up>", ax.up, "up", app)
+	M.map("n", "<down>", ax.down, "down", app)
+	M.map("n", "<left>", ax.left, "left", app)
+	M.map("n", "<right>", ax.right, "right", app)
 
 	-- pan
 	M.map("n", "<M-k>", ax.pan_up, "pan up", app)
@@ -35,6 +39,9 @@ function M.buffer_keymaps(app)
 	M.map("n", "<M-h>", ax.pan_left, "pan left", app)
 	M.map("n", "<M-l>", ax.pan_right, "pan right", app)
 	M.map("n", "0", ax.pan_reset, "pan reset", app)
+
+	-- focus
+	M.map("n", "~", ax.focus_root, "focus root", app)
 	M.map("n", "m", ax.focus_root, "focus root", app)
 	M.map("n", "c", ax.focus_active, "focus active", app)
 	M.map("n", "C", ax.focus_lock, "focus lock", app)

@@ -18,6 +18,7 @@ M.default_config = {
 	x_speed = 5,
 	y_speed = 2,
 	mode = "tree",
+	help = "general",
 	clipboard = {},
 }
 
@@ -55,7 +56,7 @@ function M.setup(config)
 		return
 	end
 
-  -- BUG: this check is not working
+	-- BUG: this check is not working
 	local filename = a.nvim_exec2("echo expand('%')", { output = true }).output
 	local ns = string.len(filename)
 	local fname = string.sub(filename, 1, ns - 4)

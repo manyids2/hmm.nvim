@@ -289,6 +289,17 @@ function M.pad_lines(lines, width, height)
 	return plines
 end
 
+function M.pad_left_top(lines, left, top)
+	local plines = {}
+	for _ = 1, top do
+		table.insert(plines, "")
+	end
+	for _, line in ipairs(lines) do
+		table.insert(plines, string.rep(" ", left) .. line)
+	end
+	return plines
+end
+
 function M.show_help(win, buf)
 	local hi = M.highlights.tip
 	local text = "   press ? for help "

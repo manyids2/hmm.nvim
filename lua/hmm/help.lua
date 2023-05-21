@@ -3,40 +3,95 @@ local io = require("hmm.io")
 
 local M = {}
 
+function M.map(win, buf, opts, lhs, mode)
+	local map = vim.keymap.set
+	map("n", lhs, function()
+		M.mode = mode
+		M.render(win, buf, opts)
+	end, { desc = mode, buffer = buf })
+end
+
+M.shortcuts = [[
+
+  (<enter>) General (n) Node (v) View (m) Misc
+
+]]
 M.lines = {
-	default = [[
-         s : save
-  <esc>, q : quit
-         ? : help
-     <C-x> : export
+	general = M.shortcuts .. [[
 
-     ↑ , k : up
-     ↓ , j : down
-     ← , h : left
-     → , l : right
-   <space> : toggle children
+  General:
 
-<enter>, o : new sibling
-  <tab>, O : new child
-         d : delete node and descendents
+         ?  ───  help
+         q  ───  quit
+     <esc>  ───  refresh
+     <C-s>  ───  reload ( harder refresh )
+     <C-x>  ───  export
 
-         J : move node down
-         K : move node up
+         b  ───  open all
+         B  ───  close all
+   <space>  ───  toggle children
+
+     ↑ , k  ───  to prev sibling
+     ↓ , j  ───  to next sibling
+     ← , h  ───  to parent
+     → , l  ───  to child
+]],
+	node = M.shortcuts .. [[
+
+  Node actions:
+
+   <space>  ───  toggle children
+  <tab>, O  ───  new child
+<enter>, o  ───  new sibling
+e, a, s, i  ───  edit, keeping current text
+E, A, S, I  ───  edit from blank
+
+         J  ───  move node down
+         K  ───  move node up
+
+  <delete>  ───  delete node and descendents
+         d  ───  cut node and descendents
+         y  ───  copy node and descendents
+         p  ───  paste as child
+         P  ───  paste as sibling
 
 ]],
-	nodes = [[
-         s : save
-  <esc>, q : quit
-<enter>, o : new sibling
-  <tab>, O : new child
-         d : delete node and descendents
+	view = M.shortcuts .. [[
+
+  View actions:
+
+         0  ───  reset origin
+     <M-k>  ───  pan up
+     <M-j>  ───  pan down
+     <M-h>  ───  pan left
+     <M-l>  ───  pan right
+
+         c  ───  focus active node
+         C  ───  toggle focus lock
+      ~, m  ───  focus root
+
 ]],
-	marks = [[
-o, <enter> : new sibling
-O,   <tab> : new child
-         d : delete node and descendents
+	misc = M.shortcuts .. [[
+
+  Misc actions:
+
+        ;c  ───  colorschemes
+        ;f  ───  find file ( press <esc> after it opens  )
+        ;g  ───  search all files
+       ;ds  ───  open directory in split
+       ;df  ───  open directory in float
+
 ]],
 }
+
+function M.render(win, buf, opts)
+	local w = math.ceil(opts.width * 0.1)
+	local h = math.ceil(opts.height * 0.1)
+	local lines = io.pad_left_top(vim.split(M.lines[M.mode], "\n"), w, h)
+	a.nvim_buf_set_lines(buf, 0, -1, false, lines)
+	a.nvim_set_current_win(win)
+	io.map_close_buffer(win, buf)
+end
 
 function M.open_help(app)
 	local height = a.nvim_win_get_height(app.win)
@@ -54,10 +109,13 @@ function M.open_help(app)
 	}
 	local buf = a.nvim_create_buf(false, true)
 	local win = a.nvim_open_win(buf, true, opts)
-	local lines = io.pad_lines(vim.split(M.lines.default, "\n"), opts.width, opts.height)
-	a.nvim_buf_set_lines(buf, 0, -1, false, lines)
-	a.nvim_set_current_win(win)
-	io.map_close_buffer(win, buf)
+
+	M.mode = "general"
+	M.map(win, buf, opts, "<enter>", "general")
+	M.map(win, buf, opts, "n", "node")
+	M.map(win, buf, opts, "v", "view")
+	M.map(win, buf, opts, "m", "misc")
+	M.render(win, buf, opts)
 end
 
 return M

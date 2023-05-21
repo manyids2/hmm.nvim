@@ -1,4 +1,4 @@
-simple|10
+simple|11
 	something super long|00
 	to|00
 		hello|00
@@ -20,13 +20,13 @@ simple|10
 		hi|10
 		hello|00
 		hello|00
-	stuff|11
+	stuff|10
 		hello|00
 		hi|00
 			hello|00
 			hi|00
 			how|00
-			hi|10
+			hi|00
 				hello|00
 				hi|00
 				how|00
