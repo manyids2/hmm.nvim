@@ -1,29 +1,52 @@
-something|10
-	else|00
-		you|00
-		know|00
-	and|10
-		else|10
-			you|00
-			know|00
-	more|11
+hello|11
+	welcome|00
 		to|00
-		here|00
-	edit the note|00
-		we|10
-			nee|00
-			to|10
-				need|10
-					to|00
-			fix|00
-	add a sibling|00
-	cut, copy and paste the child|00
-	undo and redo|00
-	saves the state of open nodes|00
-	and... file explorer!|00
-	hello there!|10
-		do|00
-		we|00
-			nee|00
-			to|00
-			fix|00
+		hmm.nvim!|00
+	get help|00
+		press ?|00
+		try turning it off and on|00
+			reset|10
+				esc|00
+			reload|10
+				ctrl+s|00
+	infinite canvas|00
+		toggle|00
+			node|10
+				space|00
+			open all|10
+				b|00
+			close all|10
+				B|00
+		pan|00
+			alt+dir|00
+			reset|10
+				0|00
+		toggle|00
+			space|00
+		focus, lock|00
+			focus lock|10
+				C|00
+			focus active|10
+				c|00
+			focus root|10
+				~, m|00
+	free features|00
+		colorschemes|00
+			;c|00
+		find file|00
+			;f|00
+		search files|00
+			;g|00
+		undo redo|00
+			undo - u|00
+			redo - ctrl+r|00
+			undo, redo across sessions!|00
+	basic node stuff|00
+		add a sibling|00
+			enter|00
+		add a child|00
+			tab|00
+		move the nodes|00
+			shift+dir|00
+		cut copy paste|00
+			d, y, p|00
