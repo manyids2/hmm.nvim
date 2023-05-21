@@ -7,6 +7,8 @@ Tested for use as standalone app, powered by `NVIM_APPNAME` from neovim.
 
 Automatically installs needed dependencies ( i.e. plugins ) using [lazy.nvim](https://github.com/folke/lazy.nvim).
 
+! Only difficult dependency: a proper [nerdfont](https://www.nerdfonts.com/font-downloads).
+
 ![hmm.nvim](./screenshots/hmm.png)
 
 Thanks to neovim as backend, we get file explorer, find files, etc. for free.
@@ -28,9 +30,29 @@ Can support any neovim colorscheme.
 
 It is indended as proof of concept of using neovim as TUI backend.
 
+
+<div style="font-size: 0.5rem;">
+
+Fonts in screenshots:
+
+( For [kitty](https://sw.kovidgoyal.net/kitty) terminal )
+
+font_family      Fira Code Regular Nerd Font Complete
+
+italic_font      Blex Mono Light Italic Nerd Font Complete
+
+bold_font        Blex Mono Bold Nerd Font Complete
+
+bold_italic_font Blex Mono SemiBold Italic Nerd Font Complete
+
+</div>
+
+
 ## Installation
 
 First install Neovim >= 0.9 ( which supports `NVIM_APPNAME` ) from [here](https://neovim.io/).
+
+Install nerdfont of choice from [nerdfont](https://www.nerdfonts.com/font-downloads).
 
 Then clone the repo, install and check out an example.
 
