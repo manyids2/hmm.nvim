@@ -11,7 +11,6 @@ end
 
 function M.buffer_keymaps(app)
 	local map = vim.keymap.set
-
 	-- quit
 	M.map("n", "q", ax.quit, "quit", app)
 
@@ -37,7 +36,14 @@ function M.buffer_keymaps(app)
 	M.map("n", "C", ax.focus_lock, "focus lock", app)
 
 	-- edit, add, copy, paste
-	M.map("n", "e", ax.edit_node, "edit node", app)
+	M.map("n", "e", ax.edit_node_preserve, "edit node", app)
+	M.map("n", "s", ax.edit_node_preserve, "edit node", app)
+	M.map("n", "a", ax.edit_node_preserve, "edit node", app)
+	M.map("n", "i", ax.edit_node_preserve, "edit node", app)
+	M.map("n", "E", ax.edit_node, "edit node from blank", app)
+	M.map("n", "S", ax.edit_node, "edit node from blank", app)
+	M.map("n", "A", ax.edit_node, "edit node from blank", app)
+	M.map("n", "I", ax.edit_node, "edit node from blank", app)
 	M.map("n", "<tab>", ax.add_child, "add child", app)
 	M.map("n", "<enter>", ax.add_sibling, "add sibling", app)
 	-- copy node -- need to make deep copy

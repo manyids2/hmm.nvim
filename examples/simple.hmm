@@ -42,7 +42,7 @@ simple|10
 		you|00
 		doing|00
 	new node of coursxe|00
-	stuff|11
+	stuff|00
 		hello|00
 		hi|10
 			hello|00
@@ -59,3 +59,5 @@ simple|10
 			you|00
 			doing|00
 		hi|00
+	more stuff|10
+		new stuff|01

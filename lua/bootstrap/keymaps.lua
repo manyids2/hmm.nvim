@@ -10,8 +10,12 @@ map("n", "q", "<cmd>qa<cr>", { desc = "Quit all" })
 
 -- For comfort options
 map("n", "<leader>l", "<cmd>:Lazy<cr>", { desc = "Lazy" })
-map("n", "<leader>f", "<cmd>:NeoTreeFloatToggle<cr>", { desc = "Directory tree" })
+map("n", "<leader>f", "<cmd>:Telescope find_files<cr>", { desc = "Find files" })
+map("n", "<leader>g", "<cmd>:Telescope live_grep<cr>", { desc = "Search within files" })
 map("n", "<leader>c", "<cmd>:Telescope colorscheme<cr>", { desc = "Colorscheme" })
+
+map("n", "<leader>fs", "<cmd>:NeoTreeShowToggle<cr>", { desc = "Directory tree in split" })
+map("n", "<leader>ff", "<cmd>:NeoTreeFloatToggle<cr>", { desc = "Directory tree in float" })
 
 -- splits
 map("n", "+", "<cmd>set wh=999<cr><cmd>set wiw=999<cr>", { desc = "Maximize window" })
