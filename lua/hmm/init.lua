@@ -31,8 +31,6 @@ function M.init(config)
 		config = M.default_config
 	end
 	app.config = vim.tbl_extend("keep", config, M.default_config)
-	vim.cmd("colorscheme " .. app.config.colorscheme)
-	vim.cmd("set background=" .. app.config.background)
 
 	-- need to reopen, else nlines is 0
 	app.filename = a.nvim_exec2("echo expand('%')", { output = true }).output

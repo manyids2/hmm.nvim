@@ -43,6 +43,8 @@ make run
 
 ## Fails
 
+- Bufferline has weird artifacts before changing colorscheme
+- Cannot open without providing filename
 - Reads and writes a lot - absolutely not performant
 - Should save state to some different place
 - Horrible code to check if node in view
