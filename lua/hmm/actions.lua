@@ -3,6 +3,12 @@ local ht = require("hmm.tree")
 
 local M = {}
 
+function M.reset(app)
+  io.save_to_file(app)
+	io.reload(app)
+	ht.render(app)
+end
+
 function M.toggle_children(tree, open)
 	if vim.tbl_count(tree.c) == 0 then
 		return
@@ -33,6 +39,11 @@ function M.toggle(app)
 		app.active.open = not app.active.open
 	end
 	ht.render(app)
+	-- need to re-render as we compute positions after open
+	if app.config.focus_lock then
+		ht.set_offset_to_active(app)
+		ht.render(app)
+	end
 end
 
 function M.left(app)
@@ -41,6 +52,10 @@ function M.left(app)
 		return
 	end
 	app.active = active.p
+	if app.config.focus_lock then
+		ht.set_offset_to_active(app)
+		ht.render(app)
+	end
 	ht.focus_active(app)
 end
 
@@ -66,6 +81,10 @@ function M.right(app)
 			end
 		end
 		app.active = active.c[index]
+		if app.config.focus_lock then
+			ht.set_offset_to_active(app)
+			ht.render(app)
+		end
 		ht.focus_active(app)
 	end
 end
@@ -80,6 +99,10 @@ function M.up(app)
 		return
 	end
 	app.active = active.p.c[math.max(1, active.si - 1)]
+	if app.config.focus_lock then
+		ht.set_offset_to_active(app)
+		ht.render(app)
+	end
 	ht.focus_active(app)
 end
 
@@ -93,6 +116,10 @@ function M.down(app)
 		return
 	end
 	app.active = active.p.c[math.min(nc, active.si + 1)]
+	if app.config.focus_lock then
+		ht.set_offset_to_active(app)
+		ht.render(app)
+	end
 	ht.focus_active(app)
 end
 
@@ -136,6 +163,9 @@ function M.add_child(app, tree)
 		p.nc = vim.tbl_count(p.c)
 		p.open = true
 		app.active = tree
+	end
+	if app.config.focus_lock then
+		ht.set_offset_to_active(app)
 	end
 	ht.render(app)
 	io.save_to_file(app)
@@ -181,11 +211,14 @@ function M.add_sibling(app, tree)
 			table.insert(cc, sib.p.c[i])
 		end
 
-    tree.p = sib.p
+		tree.p = sib.p
 		sib.p.c = cc
 		sib.p.nc = vim.tbl_count(cc)
 		sib.p.open = true
 		app.active = tree
+	end
+	if app.config.focus_lock then
+		ht.set_offset_to_active(app)
 	end
 	ht.render(app)
 	io.save_to_file(app)
@@ -209,6 +242,11 @@ function M.paste_node_as_child(app)
 		return
 	end
 	M.add_child(app, tree)
+
+	-- if came from copy, then
+	-- hack for deep copy
+	io.reload(app)
+	ht.render(app)
 end
 
 function M.paste_node_as_sibling(app)
@@ -254,6 +292,12 @@ end
 
 function M.align_levels(app)
 	app.config.align_levels = not app.config.align_levels
+	ht.render(app)
+end
+
+function M.focus_lock(app)
+	app.config.focus_lock = not app.config.focus_lock
+	ht.set_offset_to_active(app)
 	ht.render(app)
 end
 

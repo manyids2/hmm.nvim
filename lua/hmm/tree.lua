@@ -110,6 +110,22 @@ function M.set_o(tree, config)
 	end
 end
 
+function M.set_bounds(tree, config)
+	tree.tx = tree.x
+	tree.ty = tree.y
+	tree.th = tree.ch
+	if not tree.open then
+		tree.tw = tree.w
+		return
+	end
+	local tw = 0
+	for _, child in ipairs(tree.c) do
+		M.set_bounds(child, config)
+		tw = math.max(tw, child.tw)
+	end
+	tree.tw = tree.w + config.margin + tw
+end
+
 function M.layout_htree(tree, config)
 	M.set_si(tree)
 	M.set_cw(tree)
@@ -117,6 +133,15 @@ function M.layout_htree(tree, config)
 	M.set_ch(tree, config)
 	M.set_y(tree, config)
 	M.set_o(tree, config)
+	M.set_bounds(tree, config)
+end
+
+function M.set_offset_to_active(app)
+	local active = app.active
+	local y = active.y + active.toy
+	local x = active.x + 1
+	app.offset.x = app.center.x - x
+	app.offset.y = app.center.y - y
 end
 
 function M.layout_list(tree, config)

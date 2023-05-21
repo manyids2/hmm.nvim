@@ -15,6 +15,8 @@ app.default_config = {
 	max_leaf_node_width = 55,
 	max_parent_node_width = 25,
 	list_indent = 4,
+	x_speed = 5,
+	y_speed = 2,
 	mode = "tree",
 	clipboard = {},
 }

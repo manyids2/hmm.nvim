@@ -43,25 +43,25 @@ function M.global_keymaps(app)
 
 	-- pan down
 	map("n", "<c-j>", function()
-		app.offset.y = app.offset.y + 5
+		app.offset.y = app.offset.y + app.config.y_speed
 		ht.render(app)
 	end, { desc = "Pan down" })
 
 	-- pan up
 	map("n", "<c-k>", function()
-		app.offset.y = app.offset.y - 5
+		app.offset.y = app.offset.y - app.config.y_speed
 		ht.render(app)
 	end, { desc = "Pan up" })
 
 	-- pan left
 	map("n", "<c-h>", function()
-		app.offset.x = app.offset.x - 5
+		app.offset.x = app.offset.x - app.config.x_speed
 		ht.render(app)
 	end, { desc = "Pan left" })
 
 	-- pan right
 	map("n", "<c-l>", function()
-		app.offset.x = app.offset.x + 5
+		app.offset.x = app.offset.x + app.config.x_speed
 		ht.render(app)
 	end, { desc = "Pan right" })
 
@@ -76,6 +76,11 @@ function M.global_keymaps(app)
 	map("n", "|", function()
 		ax.align_levels(app)
 	end, { desc = "align levels" })
+
+	-- align levels
+	map("n", "C", function()
+		ax.focus_lock(app)
+	end, { desc = "focus lock" })
 
 	-- edit
 	map("n", "e", function()
@@ -92,12 +97,12 @@ function M.global_keymaps(app)
 		ax.add_sibling(app)
 	end, { desc = "add sibling" })
 
-	-- -- copy node -- need to make deep copy
-  -- -- or check if was copied, then write
-  -- -- to file and reload
-	-- map("n", "y", function()
-	-- 	ax.copy_node(app)
-	-- end, { desc = "copy node" })
+	-- copy node -- need to make deep copy
+	-- or check if was copied, then write
+	-- to file and reload
+	map("n", "y", function()
+		ax.copy_node(app)
+	end, { desc = "copy node" })
 
 	-- cut node
 	map("n", "d", function()
@@ -109,12 +114,12 @@ function M.global_keymaps(app)
 		ax.delete_node(app, false)
 	end, { desc = "delete node" })
 
-	-- paste node
+	-- paste child
 	map("n", "p", function()
 		ax.paste_node_as_child(app)
 	end, { desc = "paste child" })
 
-	-- paste node
+	-- paste sibling
 	map("n", "P", function()
 		ax.paste_node_as_sibling(app)
 	end, { desc = "paste sibling" })
@@ -123,6 +128,11 @@ function M.global_keymaps(app)
 	map("n", "<esc>", function()
 		ht.render(app)
 	end, { desc = "refresh" })
+
+	-- reload
+	map("n", "<c-s>", function()
+		ax.reset(app)
+	end, { desc = "reset ( read again and render )" })
 
 	-- undo
 	map("n", "u", function()
@@ -138,6 +148,17 @@ function M.global_keymaps(app)
 	map("n", "q", function()
 		ax.quit(app)
 	end, { desc = "Quit all" })
+
+	-- snap to active
+	map("n", "c", function()
+		ht.set_offset_to_active(app)
+		ht.render(app)
+	end, { desc = "Snap to active" })
+
+	-- debug
+	map("n", "t", function()
+		print(app.active.tw, app.active.th)
+	end, { desc = "Debug" })
 end
 
 return M
