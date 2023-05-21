@@ -21,10 +21,12 @@ Help is inbuilt.
 
 Can support any neovim colorscheme.
 
+<div style="display:flex">
 <img src="./screenshots/carbonfox.png" alt="carbonfox" style="width:10rem;"/>
 <img src="./screenshots/dayfox.png" alt="dayfox" style="width:10rem;"/>
 <img src="./screenshots/tokyonight.png" alt="tokyonight" style="width:10rem;"/>
 <img src="./screenshots/forestbones.png" alt="forestbones" style="width:10rem;"/>
+</div>
 
 ⚠ This is still work in progress. The implementation is spaghetti.
 
