@@ -22,7 +22,7 @@ define ANNOUNCE_DEV
 
    = 🔥
 
-	Set dev dir as plugin in lua/bootstrap/plugins.lua
+	Set Debug/Release in lua/bootstrap/plugins.lua
 
 endef
 export ANNOUNCE_DEV

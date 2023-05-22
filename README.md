@@ -46,7 +46,7 @@ Then clone the repo, install and check out an example.
 git clone https://github.com/manyids2/hmm.nvim
 cd hmm.nvim
 
-# Install hmm.nvim to XDG_CONFIG_DIR/nvim-apps/hmm.nvim
+# Install hmm.nvim to `$XDG_CONFIG_DIR/nvim-apps/hmm.nvim`
 # Installs shell script to `/usr/bin/hmm.nvim`, asks for sudo
 make install
 
