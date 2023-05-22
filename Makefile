@@ -10,6 +10,7 @@ endef
 export ANNOUNCE_INSTALL
 
 install:
+	export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 	git clone ./.git ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim
 	# rm -r ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim/lua/hmm
 	cd ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim
@@ -28,6 +29,7 @@ export ANNOUNCE_DEV
 
 
 dev:
+	export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 	rm -rf ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim
 	cp -r ./ ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim/
 	rm -r ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim/lua/hmm
@@ -44,6 +46,7 @@ endef
 export ANNOUNCE_DELETE
 
 clean:
+	export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 	@echo "$$ANNOUNCE_DELETE"
 	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	rm -rf ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim

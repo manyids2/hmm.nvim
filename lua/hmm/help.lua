@@ -2,6 +2,8 @@ local a = vim.api
 
 local M = {}
 
+-- we already exported, so XDG_CONFIG_HOME is guaranteed here
+-- and trailing slash is important!
 M.cmd = "!echo $XDG_CONFIG_HOME/nvim-apps/hmm.nvim/"
 
 function M.map(win, buf, opts, lhs, mode)
