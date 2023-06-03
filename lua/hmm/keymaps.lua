@@ -12,7 +12,6 @@ function M.map(mode, lhs, rhs, desc, app)
 end
 
 function M.buffer_keymaps(app)
-	local map = vim.keymap.set
 	-- quit, help, export
 	M.map("n", "q", ax.quit, "quit", app)
 	M.map("n", "?", hh.open_help, "help", app)
@@ -85,8 +84,13 @@ function M.buffer_keymaps(app)
 	M.map("n", "<c-r>", ax.redo, "redo", app)
 
 	-- debug
-	map("n", "t", function()
-		print(app.active.tw, app.active.th)
+	M.map("n", "t", function()
+		local active = app.active
+		for key, value in pairs(active) do
+			if key ~= "c" then -- children is too long
+				print(key, value)
+			end
+		end
 	end, { desc = "Debug" })
 end
 
