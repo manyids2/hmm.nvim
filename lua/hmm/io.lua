@@ -8,12 +8,12 @@ M.highlights = {
 	tip = { space = a.nvim_create_namespace("tip"), color = "DiagnosticUnnecessary" },
 }
 
-function M.new_Tree(index, level, text, parent, app)
+function M.new_Tree(index, level, text, parent, appstate)
 	text = vim.trim(text)
 	local state = M.get_state_from_text(text)
 	return {
 		-- our custom metada
-		app = app,
+		app = appstate, -- state for file
 		index = index,
 		level = level,
 		text = state.text,
@@ -112,10 +112,11 @@ function M.tree_to_lines(tree, level)
 	return lines
 end
 
-function M.lines_to_tree(lines, app)
+function M.lines_to_tree(lines, appstate)
 	-- initialize root ( will be discarded )
-	local root = { M.new_Tree(0, 0, "root", nil, app) }
+	local root = { M.new_Tree(0, 0, "root", nil, appstate) }
 
+	P(lines)
 	-- one node for each line
 	for index, line in ipairs(lines) do
 		-- only consider non-empty lines
@@ -124,11 +125,11 @@ function M.lines_to_tree(lines, app)
 			local level = vim.tbl_count(vim.split(line, "\t", {}))
 
 			-- set up new node
-			local node = M.new_Tree(index, level, line, root[level], app)
+			local node = M.new_Tree(index, level, line, root[level], appstate)
 
 			-- mark active
 			if node.active then
-				app.active = node
+				appstate.active = node
 			end
 
 			-- insert into tree with proper parent
@@ -152,7 +153,7 @@ function M.lines_to_tree(lines, app)
 				return
 			end
 
-			local node = M.new_Tree(1, root[1].level + 1, text, root[1], app)
+			local node = M.new_Tree(1, root[1].level + 1, text, root[1], appstate)
 			node.open = true
 			table.insert(root[1].c, node)
 
@@ -164,57 +165,57 @@ function M.lines_to_tree(lines, app)
 	local ptree = root[1].c[1]
 	ptree.p = nil
 
-	-- focus root if not state is found
-	if app.active == nil then
-		app.active = ptree
+	-- focus root if not appstate is found
+	if appstate.active == nil then
+		appstate.active = ptree
 	end
 	return ptree
 end
 
-function M.save_to_file(app)
+function M.save_to_file(state)
 	-- convert tree to lines and save
-	local lines = M.tree_to_lines(app.root, 0)
-	a.nvim_set_current_buf(app.file_buf)
-	a.nvim_buf_set_lines(app.file_buf, 0, -1, false, lines)
+	local lines = M.tree_to_lines(state.root, 0)
+	a.nvim_set_current_buf(state.fbuf)
+	a.nvim_buf_set_lines(state.fbuf, 0, -1, false, lines)
 	a.nvim_exec2('set buftype=""', {})
-	a.nvim_exec2("silent write " .. app.filename, {})
+	a.nvim_exec2("silent write " .. state.filename, {})
 
 	-- make sure we reset current buf and win
-	a.nvim_set_current_buf(app.buf)
-	a.nvim_set_current_win(app.win)
+	a.nvim_set_current_buf(state.buf)
+	a.nvim_set_current_win(state.win)
 end
 
-function M.reload(app)
+function M.reload(state)
 	-- read hmm file buffer
-	local lines = a.nvim_buf_get_lines(app.file_buf, 0, -1, false)
+	local lines = a.nvim_buf_get_lines(state.fbuf, 0, -1, false)
 
 	-- create tree
-	app.root = M.lines_to_tree(lines, app)
+	state.root = M.lines_to_tree(lines, state)
 
 	-- make sure we reset current buf and win
-	a.nvim_set_current_win(app.win)
-	a.nvim_set_current_buf(app.buf)
+	a.nvim_set_current_win(state.win)
+	a.nvim_set_current_buf(state.buf)
 
 	-- reset the size as well
-	local size = M.get_size_center(app.win)
-	app.size = { w = size.w, h = size.h }
-	app.center = { x = size.x, y = size.y }
+	local size = M.get_size_center(state.win)
+	state.size = { w = size.w, h = size.h }
+	state.center = { x = size.x, y = size.y }
 end
 
-function M.undo(app)
+function M.undo(state)
 	-- use neovim undo directly
-	a.nvim_set_current_buf(app.file_buf)
+	a.nvim_set_current_buf(state.fbuf)
 	a.nvim_exec2("silent undo", {})
-	a.nvim_exec2("silent write " .. app.filename, {})
-	M.reload(app)
+	a.nvim_exec2("silent write " .. state.filename, {})
+	M.reload(state)
 end
 
-function M.redo(app)
+function M.redo(state)
 	-- use neovim redo directly
-	a.nvim_set_current_buf(app.file_buf)
+	a.nvim_set_current_buf(state.fbuf)
 	a.nvim_exec2("silent redo", {})
-	a.nvim_exec2("silent write " .. app.filename, {})
-	M.reload(app)
+	a.nvim_exec2("silent write " .. state.filename, {})
+	M.reload(state)
 end
 
 function M.hide_cursor()

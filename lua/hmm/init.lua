@@ -1,5 +1,5 @@
 local a = vim.api
--- local io = require("hmm.io")
+local io = require("hmm.io")
 -- local ht = require("hmm.tree")
 local km = require("hmm.keymaps")
 
@@ -56,43 +56,51 @@ function app.load_config(self)
 end
 
 function app.mount(self, filename)
-	local s = self.state
-
 	-- return if not hmm file
 	local filetype = a.nvim_exec2("echo expand('%:e')", { output = true }).output
 	if filetype ~= "hmm" then
 		return
 	end
 
-	-- Capture buffer
+	-- capture file buffer
+	local fwin = a.nvim_get_current_win()
+	local fbuf = a.nvim_get_current_buf()
+	a.nvim_buf_set_option(fbuf, "buflisted", false)
+
+	-- create hmm buffer
 	local win = a.nvim_get_current_win()
-	local buf = a.nvim_get_current_buf()
-	a.nvim_buf_set_option(buf, "buflisted", false)
+	local buf = a.nvim_create_buf(true, true)
 
-	-- Create hmm buffer
-	local hwin = a.nvim_get_current_win()
-	local hbuf = a.nvim_create_buf(true, true)
-
-	-- Set buffer name as file stem ( without .hmm )
+	-- set buffer name as file stem ( without .hmm )
 	local ns = string.len(filename)
-	a.nvim_buf_set_name(hbuf, string.sub(filename, 1, ns - 4))
-	a.nvim_win_set_buf(hwin, hbuf)
+	a.nvim_buf_set_name(buf, string.sub(filename, 1, ns - 4))
+	a.nvim_win_set_buf(win, buf)
 
-	-- Set keymaps
-	km.buffer_keymaps(app, hbuf)
-
-	-- Create state for each file, with ref to app
-	s.current = filename
-	s.files[filename] = {
+	-- create state for each file, with ref to app
+	local s = {
 		app = self,
 		filename = filename,
-		config = s.config,
+		config = self.state.config,
+		fwin = fwin,
+		fbuf = fbuf,
 		win = win,
 		buf = buf,
-		hwin = hwin,
-		hbuf = hbuf,
-		state = { offset = { x = 0, y = 0 } },
+		root = nil,
+		active = nil,
+		offset = { x = 0, y = 0 },
 	}
+
+	-- read the tree
+	local lines = a.nvim_buf_get_lines(fbuf, 0, -1, false)
+	s.root = io.lines_to_tree(lines, s)
+
+	-- set the state for app
+	self.state.files[filename] = s
+	self.state.current = filename
+
+	-- set keymaps
+	km.buffer_keymaps(s, self, buf)
+
 end
 
 function app.unmount(self)

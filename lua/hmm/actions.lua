@@ -432,15 +432,27 @@ function M.redo(app)
 end
 
 function M.quit(app)
-  -- TODO: close the filename associated buffers and remove from open
+	-- close the filename associated buffers and remove from files
+	local state = app.state.files[app.state.current]
+	io.save_to_file(state)
+	ht.destroy(state)
+	app.state.files[app.state.current] = nil
 
-	-- io.save_to_file(app)
-	-- ht.destroy(app)
 	-- close vim if last remaining hmm file is closed
 	local remaining = false
+
+	-- TODO: actually want to do it in reverse order
 	for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-		if string.len(vim.api.nvim_buf_get_name(buf)) > 0 then
-			remaining = true
+		local bufname = vim.api.nvim_buf_get_name(buf)
+		if string.len(bufname) > 0 then
+			vim.api.nvim_set_current_buf(buf)
+			local filetype = vim.api.nvim_exec2("echo expand('%:e')", { output = true }).output
+			if filetype ~= "hmm" then
+				remaining = true
+				local filename = vim.api.nvim_exec2("echo expand('%')", { output = true }).output
+				app.state.current = filename .. ".hmm"
+				return
+			end
 		end
 	end
 	if not remaining then

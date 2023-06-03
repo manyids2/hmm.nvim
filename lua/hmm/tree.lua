@@ -41,9 +41,9 @@ function M.draw_node(buf, tree)
   end
 end
 
-function M.position_root(app)
-  app.offset.x = 10
-  app.offset.y = 10
+function M.position_root(state)
+  state.offset.x = 10
+  state.offset.y = 10
 end
 
 function M.set_si(tree)
@@ -136,12 +136,12 @@ function M.layout_htree(tree, config)
   M.set_bounds(tree, config)
 end
 
-function M.set_offset_to_active(app)
-  local active = app.active
+function M.set_offset_to_active(state)
+  local active = state.active
   local y = active.y + active.toy
   local x = active.x + 1
-  app.offset.x = app.center.x - x
-  app.offset.y = app.center.y - y
+  state.offset.x = state.center.x - x
+  state.offset.y = state.center.y - y
 end
 
 function M.layout_list(tree, config)
@@ -166,41 +166,41 @@ function M.render_tree(buf, tree, config)
   end
 end
 
-function M.layout(app)
-  if app.config.mode == "list" then
-    M.layout_list(app.root, app.config)
+function M.layout(state)
+  if state.config.mode == "list" then
+    M.layout_list(state.root, state.config)
   else
-    M.layout_htree(app.root, app.config)
+    M.layout_htree(state.root, state.config)
   end
 end
 
-function M.render(app)
+function M.render(state)
   -- reset colors
-	-- vim.cmd("colorscheme " .. app.config.colorscheme)
-	-- vim.cmd("set background=" .. app.config.background)
+	-- vim.cmd("colorscheme " .. state.config.colorscheme)
+	-- vim.cmd("set background=" .. state.config.background)
 
   -- reset size
-  local size = io.get_size_center(app.win)
-  app.size = { w = size.w, h = size.h }
-  app.center = { x = size.x, y = size.y }
+  local size = io.get_size_center(state.win)
+  state.size = { w = size.w, h = size.h }
+  state.center = { x = size.x, y = size.y }
 
   -- compute layout, so we get x, y of active
-  M.layout(app)
+  M.layout(state)
 
   -- reset buffer
-  io.clear_win_buf(app.buf, app.size)
-  io.show_help(app.win, app.buf)
+  io.clear_win_buf(state.buf, state.size)
+  io.show_help(state.win, state.buf)
 
   -- render to buffer
-  M.render_tree(app.buf, app.root, app.config)
+  M.render_tree(state.buf, state.root, state.config)
 
   -- set focus
-  M.focus_active(app)
+  M.focus_active(state)
 end
 
-function M.destroy(app)
-  a.nvim_buf_delete(app.file_buf, { force = true })
-  a.nvim_buf_delete(app.buf, { force = true })
+function M.destroy(state)
+  a.nvim_buf_delete(state.fbuf, { force = true })
+  a.nvim_buf_delete(state.buf, { force = true })
 end
 
 return M

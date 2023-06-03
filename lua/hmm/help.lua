@@ -15,19 +15,11 @@ function M.map(win, buf, opts, lhs, mode)
 end
 
 function M.open_help(app)
-	-- local output = a.nvim_exec2(M.cmd .. "help.hmm", { output = true }).output
-	-- local parts = vim.split(output, "\n")
-	-- local help_path = parts[3]
-	-- a.nvim_exec2("edit " .. help_path, {})
-  P(app.cfg_file)
+	a.nvim_exec2("edit " .. app.help_file, {})
 end
 
 function M.open_config(app)
-	-- local output = a.nvim_exec2(M.cmd .. "config.hmm", { output = true }).output
-	-- local parts = vim.split(output, "\n")
-	-- local help_path = parts[3]
-	-- a.nvim_exec2("edit " .. help_path, {})
-  P(app.help_file)
+	a.nvim_exec2("edit " .. app.cfg_file, {})
 end
 
 return M
