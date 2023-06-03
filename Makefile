@@ -11,8 +11,9 @@ export ANNOUNCE_INSTALL
 
 install:
 	export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
-	git clone ./.git ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim
-	# rm -r ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim/lua/hmm
+	# git clone ./.git ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim
+	cp -r ./ ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim/
+	rm -r ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim/lua/hmm
 	cd ${XDG_CONFIG_HOME}/nvim-apps/hmm.nvim
 	chmod +x hmm.nvim
 	@echo "$$ANNOUNCE_INSTALL"
