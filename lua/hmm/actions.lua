@@ -432,8 +432,10 @@ function M.redo(app)
 end
 
 function M.quit(app)
-	io.save_to_file(app)
-	ht.destroy(app)
+  -- TODO: close the filename associated buffers and remove from open
+
+	-- io.save_to_file(app)
+	-- ht.destroy(app)
 	-- close vim if last remaining hmm file is closed
 	local remaining = false
 	for _, buf in ipairs(vim.api.nvim_list_bufs()) do

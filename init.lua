@@ -18,16 +18,25 @@ local filename = vim.api.nvim_exec2("echo expand('%')", { output = true }).outpu
 if filename == "" then
 	vim.ui.input({ prompt = "New: " }, function(text)
 		-- get filename from input
-		filename = vim.trim(text) .. ".hmm"
+		if text == nil then
+			vim.cmd("qa!")
+		end
+
+		-- quit if empty string
+		text = vim.trim(text)
+		if string.len(text) == 0 then
+			vim.cmd("qa!")
+		end
+
+		-- otherwise properly open the file
+		filename = text .. ".hmm"
 		write_filename(filename)
-		-- open the file
 		require("hmm").setup()
 	end)
 else
-	-- if file does not exist, first save it
+	-- if file does not exist, first save it, then open
 	if vim.tbl_count(vim.fs.find(filename, { upward = false })) == 0 then
 		write_filename(filename)
-		-- open the file
 		require("hmm").setup()
 	end
 end
