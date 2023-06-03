@@ -1,8 +1,8 @@
-hello|11
+hello|10
 	welcome|10
 		to|00
 		hmm.nvim!|00
-	get help|00
+	get help|10
 		press ?|00
 		if top line is wonky|00
 		try turning it off and on|00
@@ -10,7 +10,7 @@ hello|11
 				esc|00
 			reload|10
 				ctrl+s|00
-	basics|10
+	basics|11
 		quit|10
 			q|00
 		toggle|10
@@ -37,13 +37,13 @@ hello|11
 				c|00
 			focus root|10
 				~, m|00
-	free features|00
+	free features|10
 		undo redo|00
 			undo - u|00
 			redo - ctrl+r|00
 			undo, redo across sessions!|00
 		  press esc after loading file from search|00
-		colorschemes|00
+		colorschemes|10
 			;c|00
 		find file|00
 			;f|00

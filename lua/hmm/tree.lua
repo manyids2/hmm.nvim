@@ -130,7 +130,8 @@ function M.set_offset_to_active(state)
 	local active = state.active
 	local y = active.y + active.toy
 	local x = active.x + 1
-	state.offset.x = state.center.x - x
+	-- set x to 1/3rd of screen so parent is also visible
+	state.offset.x = math.ceil(state.size.w / 3) - x
 	state.offset.y = state.center.y - y
 end
 
