@@ -438,9 +438,6 @@ function M.quit(app)
 	ht.destroy(state)
 	app.state.files[app.state.current] = nil
 
-	-- close vim if last remaining hmm file is closed
-	local remaining = false
-
 	-- TODO: actually want to do it in reverse order
 	for _, buf in ipairs(vim.api.nvim_list_bufs()) do
 		local bufname = vim.api.nvim_buf_get_name(buf)
@@ -448,16 +445,14 @@ function M.quit(app)
 			vim.api.nvim_set_current_buf(buf)
 			local filetype = vim.api.nvim_exec2("echo expand('%:e')", { output = true }).output
 			if filetype ~= "hmm" then
-				remaining = true
 				local filename = vim.api.nvim_exec2("echo expand('%')", { output = true }).output
 				app.state.current = filename .. ".hmm"
 				return
 			end
 		end
 	end
-	if not remaining then
-		vim.cmd([[qa]])
-	end
+	-- close vim if nothing is left
+	vim.cmd([[qa]])
 end
 
 return M

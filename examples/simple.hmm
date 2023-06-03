@@ -20,7 +20,7 @@ simple|10
 		hi|10
 		hello|00
 		hello|00
-	stuff|11
+	stuff|10
 		hello|00
 		hi|00
 			hello|00
@@ -37,7 +37,7 @@ simple|10
 			you|00
 			doing|00
 		hi|00
-	hi|00
+	hi|01
 		hello|00
 		hi|00
 		how|00

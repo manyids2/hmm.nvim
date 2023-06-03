@@ -116,7 +116,6 @@ function M.lines_to_tree(lines, appstate)
 	-- initialize root ( will be discarded )
 	local root = { M.new_Tree(0, 0, "root", nil, appstate) }
 
-	P(lines)
 	-- one node for each line
 	for index, line in ipairs(lines) do
 		-- only consider non-empty lines

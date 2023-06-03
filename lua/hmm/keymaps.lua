@@ -76,7 +76,7 @@ function M.buffer_keymaps(state, app, buf)
 	M.map("n", "P", ax.paste_node_as_sibling, "paste node as sibling", state, buf)
 
 	-- manual refreshes
-	-- M.map("n", "<esc>", ht.render, "render", state, buf)
+	M.map("n", "<esc>", ht.render, "render", state, buf)
 	M.map("n", "<c-s>", ax.reset, "reset", state, buf)
 
 	-- undo, redo

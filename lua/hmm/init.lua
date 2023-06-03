@@ -1,6 +1,6 @@
 local a = vim.api
 local io = require("hmm.io")
--- local ht = require("hmm.tree")
+local ht = require("hmm.tree")
 local km = require("hmm.keymaps")
 
 local app = {
@@ -101,6 +101,8 @@ function app.mount(self, filename)
 	-- set keymaps
 	km.buffer_keymaps(s, self, buf)
 
+	-- render
+	ht.render(s)
 end
 
 function app.unmount(self)
@@ -114,13 +116,13 @@ function app.unmount(self)
 end
 
 function app.setup()
+	-- load config
+	app:load_config()
+
 	local filename = vim.api.nvim_exec2("echo expand('%')", { output = true }).output
 	if not vim.tbl_contains(app.state.files, filename) then
 		app:mount(filename)
 	end
-
-	-- load config
-	app:load_config()
 end
 
 return app
