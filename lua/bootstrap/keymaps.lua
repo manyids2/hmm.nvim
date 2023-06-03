@@ -6,7 +6,7 @@ local function map(mode, lhs, rhs, opts)
 end
 
 -- quit
-map("n", "q", "<cmd>qa<cr>", { desc = "Quit all" })
+map("n", "<C-q>", "<cmd>qa<cr>", { desc = "Quit all" })
 
 -- For comfort options
 map("n", "<leader>l", "<cmd>:Lazy<cr>", { desc = "Lazy" })

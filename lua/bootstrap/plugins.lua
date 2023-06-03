@@ -95,10 +95,10 @@ local plugins = {
 	},
 
 	-- Dev
-	-- { dir = "/home/x/fd/code/nvim-stuff/hmm.nvim" },
+	{ dir = "/home/x/fd/code/nvim-stuff/hmm.nvim" },
 
 	-- Release
-	{ "manyids2/hmm.nvim" },
+	-- { "manyids2/hmm.nvim" },
 }
 
 require("lazy").setup(plugins)
