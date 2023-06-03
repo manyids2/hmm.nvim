@@ -9,7 +9,8 @@ It is intended as plug and play replacement for h-m-m, when it is ready.
 
 Automatically installs needed dependencies ( i.e. plugins ) using [lazy.nvim](https://github.com/folke/lazy.nvim).
 
-! Only difficult dependency: a proper [nerdfont](https://www.nerdfonts.com/font-downloads).
+! Only difficult dependency: a proper [nerdfont](https://www.nerdfonts.com/font-downloads), set up
+the terminal with that font.
 
 ![hmm.nvim](./screenshots/hmm.png)
 
@@ -39,6 +40,16 @@ It is indended as proof of concept of using neovim as TUI backend.
 First install Neovim >= 0.9 ( which supports `NVIM_APPNAME` ) from [here](https://neovim.io/).
 
 Install nerdfont of choice from [nerdfont](https://www.nerdfonts.com/font-downloads).
+Configure your terminal to use it.
+
+For [kitty](https://sw.kovidgoyal.net/kitty) terminal, with IBM Plex and FiraCode,
+
+```
+font_family Fira Code Regular Nerd Font Complete
+italic_font Blex Mono Light Italic Nerd Font Complete
+bold_font Blex Mono Bold Nerd Font Complete
+bold_italic_font Blex Mono SemiBold Italic Nerd Font Complete
+```
 
 Then clone the repo, install and check out an example.
 
@@ -211,13 +222,3 @@ The following are the settings in h-m-m:
 - [-] center_lock = false
 - [x] focus_lock = false
 - [o] max_undo_steps = 24
-
-## screenshots
-
-Fonts in screenshots:
-( For [kitty](https://sw.kovidgoyal.net/kitty) terminal )
-
-- font_family Fira Code Regular Nerd Font Complete
-- italic_font Blex Mono Light Italic Nerd Font Complete
-- bold_font Blex Mono Bold Nerd Font Complete
-- bold_italic_font Blex Mono SemiBold Italic Nerd Font Complete
